@@ -18,7 +18,7 @@ import java.util.List;
 public class DataWrapper {
 
     public static DataWrapper read(File file) throws JAXBException {
-        if (file == null || !file.exists()) return null;
+        if (file == null || !file.exists()) return new DataWrapper();
         JAXBContext context = JAXBContext.newInstance(DataWrapper.class);
         Unmarshaller unmarshaller = context.createUnmarshaller();
         return (DataWrapper) unmarshaller.unmarshal(file);

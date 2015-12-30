@@ -31,7 +31,7 @@
                    BorderPane.alignment="CENTER">
             <items>
                 <TreeView fx:id="areas" showRoot="false"/>
-                <ListView fx:id="plContent"/>
+                <ListView fx:id="contents"/>
             </items>
         </SplitPane>
     </center>

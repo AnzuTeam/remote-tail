@@ -9,6 +9,15 @@ import java.io.InputStream;
  */
 public class JchsTest {
 
+    /** 顯示指定行的內容 **/
+    // sed -n 16224,16482p FRServer1_console.log
+
+    /**
+     * 計算檔案行數
+     **/
+    // wc -l FRServer1_console.log
+
+
     final String account = "eservice";
     final String password = "eservice";
     final String host = "10.64.33.95";

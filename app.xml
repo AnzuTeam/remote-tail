@@ -9,7 +9,7 @@
             <expanded>true</expanded>
             <logs>
                 <logPath>
-                    <path>1111</path>
+                    <path>/wls/eservice/ESFRONT/logs/FRServer1_console.log</path>
                 </logPath>
                 <logPath>
                     <path>2222</path>
@@ -21,7 +21,7 @@
             <port>22</port>
             <account>eservice</account>
             <password>eservice</password>
-            <expanded>false</expanded>
+            <expanded>true</expanded>
             <logs>
                 <logPath>
                     <path>3333</path>

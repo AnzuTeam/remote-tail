@@ -1,5 +1,11 @@
 package com.prhythm.app.remotetail.models;
 
+import com.jcraft.jsch.Channel;
+import com.jcraft.jsch.JSch;
+import com.jcraft.jsch.JSchException;
+import com.jcraft.jsch.Session;
+import com.prhythm.core.generic.exception.RecessiveException;
+
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
@@ -28,6 +34,8 @@ public class Server {
     @XmlElement(name = "logPath")
     List<LogPath> logPaths;
 
+    transient Session session;
+
     public Server() {
         logPaths = new ArrayList<>();
     }
@@ -39,6 +47,39 @@ public class Server {
         this.account = account;
         this.password = password;
     }
+
+    public boolean isConnected() {
+        return session != null && session.isConnected();
+    }
+
+    public void connect() {
+        try {
+            JSch jsch = new JSch();
+            session = jsch.getSession(account, host, port);
+            session.setPassword(password);
+            session.connect();
+        } catch (Exception e) {
+            throw new RecessiveException(e.getMessage(), e);
+        }
+    }
+
+    public Channel openChannel(String type) {
+        try {
+            return session.openChannel(type);
+        } catch (JSchException e) {
+            throw new RecessiveException(e.getMessage(), e);
+        }
+    }
+
+    @Override
+    protected void finalize() throws Throwable {
+        super.finalize();
+        if (session != null) {
+            session.disconnect();
+        }
+    }
+
+    // setter & getter
 
     public String getHost() {
         return host;

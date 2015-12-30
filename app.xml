@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<wrapper>
+    <servers>
+        <server>
+            <host>10.64.33.95</host>
+            <port>22</port>
+            <account>eservice</account>
+            <password>eservice</password>
+            <expanded>true</expanded>
+            <logs>
+                <logPath>
+                    <path>1111</path>
+                </logPath>
+                <logPath>
+                    <path>2222</path>
+                </logPath>
+            </logs>
+        </server>
+        <server>
+            <host>10.64.33.295</host>
+            <port>22</port>
+            <account>eservice</account>
+            <password>eservice</password>
+            <expanded>false</expanded>
+            <logs>
+                <logPath>
+                    <path>3333</path>
+                </logPath>
+                <logPath>
+                    <path>44444</path>
+                </logPath>
+            </logs>
+        </server>
+    </servers>
+</wrapper>

@@ -58,6 +58,7 @@ public class Server {
             session = jsch.getSession(account, host, port);
             session.setPassword(password);
             session.connect();
+            System.out.printf("Connect %s%n", this);
         } catch (Exception e) {
             throw new RecessiveException(e.getMessage(), e);
         }
@@ -76,6 +77,7 @@ public class Server {
         super.finalize();
         if (session != null) {
             session.disconnect();
+            System.out.printf("Disconnect %s%n", this);
         }
     }
 

@@ -3,21 +3,42 @@ package com.prhythm.app.remotetail.data;
 import com.jcraft.jsch.ChannelExec;
 import com.prhythm.app.remotetail.models.LogPath;
 import com.prhythm.app.remotetail.models.Server;
-import com.prhythm.core.generic.exception.RecessiveException;
+import com.prhythm.core.generic.data.Expirable;
 import javafx.beans.InvalidationListener;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 
 import java.io.InputStream;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 
 /**
+ * Log 內容
  * Created by nanashi07 on 15/12/30.
  */
-public class RemoteLogReaderList implements ObservableList<String> {
+public class RemoteLogReaderList implements ObservableList<Line> {
 
-    Server server;
-    LogPath logPath;
+    final Server server;
+    final LogPath logPath;
+
+    Expirable<Integer> lineCount = new Expirable<Integer>(TimeUnit.SECONDS.toMillis(1)) {
+        @Override
+        protected Integer get() throws Exception {
+            synchronized (server) {
+                if (!server.isConnected()) server.connect();
+            }
+            ChannelExec exec = (ChannelExec) server.openChannel("exec");
+            // 指令 wc : 計算檔案行數
+            exec.setCommand(String.format("wc -l %s", logPath));
+            InputStream in = exec.getInputStream();
+            exec.connect();
+            Scanner scanner = new Scanner(in);
+            int size = scanner.nextInt();
+            in.close();
+            exec.disconnect();
+            return size;
+        }
+    };
 
     public RemoteLogReaderList(Server server, LogPath logPath) {
         this.server = server;
@@ -25,12 +46,12 @@ public class RemoteLogReaderList implements ObservableList<String> {
     }
 
     @Override
-    public void addListener(ListChangeListener<? super String> listener) {
+    public void addListener(ListChangeListener<? super Line> listener) {
 
     }
 
     @Override
-    public void removeListener(ListChangeListener<? super String> listener) {
+    public void removeListener(ListChangeListener<? super Line> listener) {
 
     }
 
@@ -44,21 +65,10 @@ public class RemoteLogReaderList implements ObservableList<String> {
 
     }
 
+
     @Override
     public int size() {
-        try {
-            if (!server.isConnected()) server.connect();
-            ChannelExec exec = (ChannelExec) server.openChannel("exec");
-            exec.setCommand(String.format("wc -l %s", logPath));
-            InputStream in = exec.getInputStream();
-            exec.connect();
-            Scanner scanner = new Scanner(in);
-            int size = scanner.nextInt();
-            exec.disconnect();
-            return size;
-        } catch (Throwable e) {
-            throw new RecessiveException(e.getMessage(), e);
-        }
+        return lineCount.value();
     }
 
     @Override
@@ -67,15 +77,13 @@ public class RemoteLogReaderList implements ObservableList<String> {
     }
 
     @Override
-    public String get(int index) {
-        return String.valueOf(index);
+    public Line get(int index) {
+        return new Line(index, String.valueOf(index));
     }
 
     @Override
     protected void finalize() throws Throwable {
         super.finalize();
-        server = null;
-        logPath = null;
     }
 
     // UnsupportedOperation
@@ -83,7 +91,7 @@ public class RemoteLogReaderList implements ObservableList<String> {
     @SuppressWarnings("NullableProblems")
     @Deprecated
     @Override
-    public Iterator<String> iterator() {
+    public Iterator<Line> iterator() {
         throw new UnsupportedOperationException();
     }
 
@@ -104,14 +112,14 @@ public class RemoteLogReaderList implements ObservableList<String> {
     @SuppressWarnings("NullableProblems")
     @Deprecated
     @Override
-    public ListIterator<String> listIterator() {
+    public ListIterator<Line> listIterator() {
         throw new UnsupportedOperationException();
     }
 
     @SuppressWarnings("NullableProblems")
     @Deprecated
     @Override
-    public ListIterator<String> listIterator(int index) {
+    public ListIterator<Line> listIterator(int index) {
         throw new UnsupportedOperationException();
     }
 
@@ -123,19 +131,19 @@ public class RemoteLogReaderList implements ObservableList<String> {
 
     @Deprecated
     @Override
-    public String set(int index, String element) {
+    public Line set(int index, Line element) {
         throw new UnsupportedOperationException();
     }
 
     @Deprecated
     @Override
-    public void add(int index, String element) {
+    public void add(int index, Line element) {
         throw new UnsupportedOperationException();
     }
 
     @Deprecated
     @Override
-    public String remove(int index) {
+    public Line remove(int index) {
         throw new UnsupportedOperationException();
     }
 
@@ -154,13 +162,13 @@ public class RemoteLogReaderList implements ObservableList<String> {
     @SuppressWarnings("NullableProblems")
     @Deprecated
     @Override
-    public List<String> subList(int fromIndex, int toIndex) {
+    public List<Line> subList(int fromIndex, int toIndex) {
         throw new UnsupportedOperationException();
     }
 
     @Deprecated
     @Override
-    public boolean add(String s) {
+    public boolean add(Line s) {
         throw new UnsupportedOperationException();
     }
 
@@ -178,13 +186,13 @@ public class RemoteLogReaderList implements ObservableList<String> {
 
     @Deprecated
     @Override
-    public boolean addAll(Collection<? extends String> c) {
+    public boolean addAll(Collection<? extends Line> c) {
         throw new UnsupportedOperationException();
     }
 
     @Deprecated
     @Override
-    public boolean addAll(int index, Collection<? extends String> c) {
+    public boolean addAll(int index, Collection<? extends Line> c) {
         throw new UnsupportedOperationException();
     }
 
@@ -208,31 +216,31 @@ public class RemoteLogReaderList implements ObservableList<String> {
 
     @Deprecated
     @Override
-    public boolean addAll(String... elements) {
+    public boolean addAll(Line... elements) {
         throw new UnsupportedOperationException();
     }
 
     @Deprecated
     @Override
-    public boolean setAll(String... elements) {
+    public boolean setAll(Line... elements) {
         throw new UnsupportedOperationException();
     }
 
     @Deprecated
     @Override
-    public boolean setAll(Collection<? extends String> col) {
+    public boolean setAll(Collection<? extends Line> col) {
         throw new UnsupportedOperationException();
     }
 
     @Deprecated
     @Override
-    public boolean removeAll(String... elements) {
+    public boolean removeAll(Line... elements) {
         throw new UnsupportedOperationException();
     }
 
     @Deprecated
     @Override
-    public boolean retainAll(String... elements) {
+    public boolean retainAll(Line... elements) {
         throw new UnsupportedOperationException();
     }
 

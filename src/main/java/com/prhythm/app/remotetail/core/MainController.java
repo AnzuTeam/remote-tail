@@ -82,8 +82,10 @@ public class MainController {
                 TreeItem parent = item.getParent();
                 Server server = (Server) parent.getValue();
 
+                RemoteLogReaderList list = new RemoteLogReaderList(server, path);
                 //noinspection unchecked
-                contents.setItems(new RemoteLogReaderList(server, path));
+                contents.setItems(list);
+                contents.getSelectionModel().select(list.size() - 1);
             }
         });
 

@@ -4,6 +4,7 @@ import com.jcraft.jsch.ChannelExec;
 import com.prhythm.app.remotetail.models.LogPath;
 import com.prhythm.app.remotetail.models.Server;
 import com.prhythm.core.generic.data.Expirable;
+import com.prhythm.core.generic.logging.Logs;
 import javafx.beans.InvalidationListener;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
@@ -29,7 +30,9 @@ public class RemoteLogReaderList implements ObservableList<Line> {
             }
             ChannelExec exec = (ChannelExec) server.openChannel("exec");
             // 指令 wc : 計算檔案行數
-            exec.setCommand(String.format("wc -l %s", logPath));
+            String cmd = String.format("wc -l %s", logPath);
+            Logs.trace(cmd);
+            exec.setCommand(cmd);
             InputStream in = exec.getInputStream();
             exec.connect();
             Scanner scanner = new Scanner(in);

@@ -5,6 +5,7 @@ import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.Session;
 import com.prhythm.core.generic.exception.RecessiveException;
+import com.prhythm.core.generic.logging.Logs;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
@@ -58,9 +59,16 @@ public class Server {
             session = jsch.getSession(account, host, port);
             session.setPassword(password);
             session.connect();
-            System.out.printf("Connect %s%n", this);
+            Logs.info("Connect %s", this);
         } catch (Exception e) {
             throw new RecessiveException(e.getMessage(), e);
+        }
+    }
+
+    public void disconnect() {
+        if (session != null && session.isConnected()) {
+            session.disconnect();
+            Logs.info("Disconnect %n", this);
         }
     }
 
@@ -74,11 +82,8 @@ public class Server {
 
     @Override
     protected void finalize() throws Throwable {
+        disconnect();
         super.finalize();
-        if (session != null) {
-            session.disconnect();
-            System.out.printf("Disconnect %s%n", this);
-        }
     }
 
     // setter & getter

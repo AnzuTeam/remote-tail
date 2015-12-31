@@ -58,14 +58,11 @@ public abstract class Expirable<T> extends Once<T> {
         if (timeout > 0 && (System.currentTimeMillis() - lastUpdated) > timeout) {
             lastUpdated = System.currentTimeMillis();
             if (value != null) {
-                new Thread(new Runnable() {
-                    @Override
-                    public void run() {
-                        try {
-                            Expirable.this.value = get();
-                        } catch (Exception e) {
-                            throw new RecessiveException(e.getMessage(), e);
-                        }
+                new Thread(() -> {
+                    try {
+                        Expirable.this.value = get();
+                    } catch (Exception e) {
+                        throw new RecessiveException(e.getMessage(), e);
                     }
                 }).start();
             }

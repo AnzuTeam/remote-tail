@@ -5,11 +5,9 @@ import com.prhythm.app.remotetail.models.DataWrapper;
 import com.prhythm.app.remotetail.models.LogPath;
 import com.prhythm.app.remotetail.models.Server;
 import javafx.beans.property.BooleanProperty;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
-import javafx.event.EventHandler;
 import javafx.fxml.FXML;
+import javafx.scene.Node;
 import javafx.scene.control.ListView;
 import javafx.scene.control.SelectionMode;
 import javafx.scene.control.TreeItem;
@@ -42,55 +40,55 @@ public class MainController {
             ObservableList<TreeItem<Object>> rootChildren = root.getChildren();
             for (Server server : wrapper.getServers()) {
                 // 顯示 server 設定
-                TreeItem<Object> treeItem = new TreeItem<>(server, new ImageView(new Image(getClass().getResourceAsStream(ICON_SERVER))));
+                TreeItem<Object> treeItem = new TreeItem<>(server, getIcon(ICON_SERVER));
                 treeItem.setExpanded(server.isExpanded());
                 rootChildren.add(treeItem);
 
                 // 記錄展開／折疊的變更
-                treeItem.expandedProperty().addListener(new ChangeListener<Boolean>() {
-                    @Override
-                    public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
-                        BooleanProperty property = (BooleanProperty) observable;
-                        TreeItem item = (TreeItem) property.getBean();
-                        Object value = item.getValue();
-                        if (value == null || !(value instanceof Server)) return;
-                        Server server = (Server) value;
-                        server.setExpanded(newValue);
-                    }
+                treeItem.expandedProperty().addListener((observable, oldValue, newValue) -> {
+                    BooleanProperty property = (BooleanProperty) observable;
+                    TreeItem item = (TreeItem) property.getBean();
+                    Object value = item.getValue();
+                    if (value == null || !(value instanceof Server)) return;
+                    Server server1 = (Server) value;
+                    server1.setExpanded(newValue);
                 });
 
                 final ObservableList<TreeItem<Object>> serverChildren = treeItem.getChildren();
 
                 // 處理 log 路徑設定
                 for (LogPath logPath : server.getLogPaths()) {
-                    TreeItem<Object> logPathTreeItem = new TreeItem<>(logPath, new ImageView(new Image(getClass().getResourceAsStream(ICON_LOG))));
+                    TreeItem<Object> logPathTreeItem = new TreeItem<>(logPath, getIcon(ICON_LOG));
                     serverChildren.add(logPathTreeItem);
                 }
             }
         }
 
-        // 註冊事件
-        areas.addEventFilter(MouseEvent.MOUSE_CLICKED, new EventHandler<MouseEvent>() {
-            @Override
-            public void handle(MouseEvent event) {
-                TreeItem item = (TreeItem) areas.getSelectionModel().getSelectedItem();
-                if (item == null) return;
-                Object value = item.getValue();
-                if (value == null || !(value instanceof LogPath)) return;
-                LogPath path = (LogPath) value;
+        // 註冊點選 log 事件
+        areas.addEventFilter(MouseEvent.MOUSE_CLICKED, event -> {
+            TreeItem item = (TreeItem) areas.getSelectionModel().getSelectedItem();
+            if (item == null) return;
+            Object value = item.getValue();
+            if (value == null || !(value instanceof LogPath)) return;
+            LogPath path = (LogPath) value;
 
-                TreeItem parent = item.getParent();
-                Server server = (Server) parent.getValue();
+            TreeItem parent = item.getParent();
+            Server server = (Server) parent.getValue();
 
-                RemoteLogReaderList list = new RemoteLogReaderList(server, path);
-                //noinspection unchecked
-                contents.setItems(list);
-                contents.getSelectionModel().select(list.size() - 1);
-            }
+            RemoteLogReaderList list = new RemoteLogReaderList(server, path);
+            //noinspection unchecked
+            contents.setItems(list);
+            // 連接時移至底部
+            contents.scrollTo(list.size() - 1);
+
         });
 
         // 多選
         contents.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
+    }
+
+    Node getIcon(String path) {
+        return new ImageView(new Image(getClass().getResourceAsStream(path)));
     }
 
 }

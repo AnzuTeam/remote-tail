@@ -1,4 +1,5 @@
 import com.jcraft.jsch.*;
+import com.prhythm.core.generic.logging.Logs;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -22,11 +23,11 @@ public class TestListen implements Runnable {
             if ("exit".equalsIgnoreCase(type)) {
 //                listen.stop = true;
                 listen.session.disconnect();
-                System.out.println("session disconnected");
+                Logs.info("session disconnected");
                 break;
             }
         }
-        System.out.println("application closed");
+        Logs.info("application closed");
     }
 
     Session session;
@@ -50,7 +51,7 @@ public class TestListen implements Runnable {
         session.setPassword(password);
 //        session.setOutputStream(System.out);
         session.connect();
-        System.out.println("session connected");
+        Logs.info("session connected");
     }
 
     void tail() throws JSchException, IOException {

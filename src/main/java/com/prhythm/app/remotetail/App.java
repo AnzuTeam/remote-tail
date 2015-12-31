@@ -3,14 +3,17 @@ package com.prhythm.app.remotetail;
 import com.jcraft.jsch.JSch;
 import com.prhythm.app.remotetail.core.MainController;
 import com.prhythm.app.remotetail.models.DataWrapper;
+import com.prhythm.app.remotetail.models.Server;
+import com.prhythm.core.generic.logging.GenericLogger;
+import com.prhythm.core.generic.logging.Level;
+import com.prhythm.core.generic.logging.LogFactory;
+import com.prhythm.core.generic.logging.Logs;
 import com.prhythm.core.generic.util.Strings;
 import javafx.application.Application;
-import javafx.event.EventHandler;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.stage.Stage;
-import javafx.stage.WindowEvent;
 
 import javax.xml.bind.JAXBException;
 import java.io.File;
@@ -28,6 +31,9 @@ public class App extends Application {
         // 不處理 host key
         JSch.setConfig("StrictHostKeyChecking", "no");
 
+        // log
+        new Logs().setLogFactory(new LogFactory(new GenericLogger(Level.Trace)));
+
         launch(args);
     }
 
@@ -37,16 +43,17 @@ public class App extends Application {
     public void start(Stage primaryStage) throws IOException {
         FXMLLoader loader = new FXMLLoader(getClass().getResource(MainController.LAYOUT_MAIN));
         primaryStage.setScene(new Scene(loader.load(), 800, 450));
-        primaryStage.setOnCloseRequest(new EventHandler<WindowEvent>() {
-            @Override
-            public void handle(WindowEvent event) {
-                // 儲存資料
-                if (wrapper == null) return;
-                try {
-                    wrapper.save(new File(CONFIG_FILE));
-                } catch (JAXBException e) {
-                    alert("", e);
-                }
+        primaryStage.setOnCloseRequest(event -> {
+            // 儲存資料
+            if (wrapper == null) return;
+            for (Server server : wrapper.getServers()) {
+                server.disconnect();
+            }
+
+            try {
+                wrapper.save(new File(CONFIG_FILE));
+            } catch (JAXBException e) {
+                alert("", e);
             }
         });
 

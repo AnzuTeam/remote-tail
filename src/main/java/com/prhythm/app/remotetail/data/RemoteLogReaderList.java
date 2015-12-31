@@ -22,9 +22,9 @@ import java.util.concurrent.TimeUnit;
  * Log 內容
  * Created by nanashi07 on 15/12/30.
  */
-public class RemoteLogReaderList implements ObservableList<Line>, Runnable {
+public class RemoteLogReaderList extends Observable implements ObservableList<Line>, Runnable {
 
-    final long flush = TimeUnit.SECONDS.toMillis(2);
+    final long INTERVAL = TimeUnit.SECONDS.toMillis(2);
 
     transient final Server server;
     transient final LogPath path;
@@ -32,7 +32,7 @@ public class RemoteLogReaderList implements ObservableList<Line>, Runnable {
     /**
      * 檔案行數
      */
-    transient Expirable<Integer> lineCount = new Expirable<Integer>(flush) {
+    transient Expirable<Integer> lineCount = new Expirable<Integer>(INTERVAL) {
         @Override
         protected Integer get() throws Exception {
             synchronized (server) {
@@ -41,7 +41,7 @@ public class RemoteLogReaderList implements ObservableList<Line>, Runnable {
             ChannelExec exec = server.openChannel("exec");
             // 指令 wc : 計算檔案行數
             String cmd = String.format("wc -l %s", path);
-            Logs.trace(cmd);
+            Logs.trace("計算行數(%s)", cmd);
             exec.setCommand(cmd);
             InputStream in = exec.getInputStream();
             exec.connect();
@@ -104,7 +104,9 @@ public class RemoteLogReaderList implements ObservableList<Line>, Runnable {
         } else {
             linesToRead.add(index);
             // fixme cache line obj
-            return new Line(index, null, false);
+            Line line = new Line(index, null, false);
+            addObserver(line);
+            return line;
         }
     }
 
@@ -120,7 +122,7 @@ public class RemoteLogReaderList implements ObservableList<Line>, Runnable {
             }
 
             try {
-                Thread.sleep(1000);
+                Thread.sleep(INTERVAL);
             } catch (InterruptedException e) {
                 Logs.error(e);
             }
@@ -166,13 +168,13 @@ public class RemoteLogReaderList implements ObservableList<Line>, Runnable {
         synchronized (server) {
             if (!server.isConnected()) server.connect();
         }
-        ChannelExec exec = server.openChannel("exec");
+        ChannelExec channel = server.openChannel("exec");
         // 指令 sed : 顯示指定行的內容
-        String cmd = String.format("sed -n %d,%d %s", min, max, path);
-        Logs.trace(cmd);
-        exec.setCommand(cmd);
-        InputStream in = exec.getInputStream();
-        exec.connect();
+        String cmd = String.format("sed -n %d,%dp %s", min, max, path);
+        Logs.trace("讀取指定行(%s)", cmd);
+        channel.setCommand(cmd);
+        InputStream in = channel.getInputStream();
+        channel.connect();
 
         // 暫存資料
         List<String> lines = Streams.toLines(in, "utf-8");
@@ -183,9 +185,10 @@ public class RemoteLogReaderList implements ObservableList<Line>, Runnable {
         // 移除已讀取內容
         linesToRead.removeAll(values.toSet());
 
-        exec.disconnect();
+        channel.disconnect();
 
-        // TODO 通知顯示變更
+        // 通知顯示變更
+        notifyObservers(path);
     }
 
     @Override

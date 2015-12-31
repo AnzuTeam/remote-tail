@@ -1,5 +1,7 @@
 package com.prhythm.app.remotetail.data;
 
+import com.prhythm.app.remotetail.models.LogPath;
+
 import java.util.Observable;
 import java.util.Observer;
 
@@ -45,6 +47,12 @@ public class Line implements Observer {
 
     @Override
     public void update(Observable o, Object arg) {
-
+        if (arg != null && arg instanceof LogPath) {
+            LogPath path = (LogPath) arg;
+            if (path.hasLine(index)) {
+                content = path.atLine(index);
+                loaded = true;
+            }
+        }
     }
 }

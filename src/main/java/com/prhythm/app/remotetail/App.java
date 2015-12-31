@@ -70,12 +70,7 @@ public class App extends Application {
         }
 
         // 未處理錯誤
-//        Thread.setDefaultUncaughtExceptionHandler(new Thread.UncaughtExceptionHandler() {
-//            @Override
-//            public void uncaughtException(Thread t, Throwable e) {
-//                alert("未處理錯誤", e);
-//            }
-//        });
+        Thread.setDefaultUncaughtExceptionHandler((t, e) -> Logs.error(e));
 
         // 顯示
         primaryStage.show();

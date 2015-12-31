@@ -24,12 +24,15 @@ public class DataWrapper {
         return (DataWrapper) unmarshaller.unmarshal(file);
     }
 
+    Window window;
+
     @XmlElementWrapper(name = "servers")
     @XmlElement(name = "server")
     List<Server> servers;
 
     public DataWrapper() {
-        servers = new ArrayList<>();
+        this.window = new Window();
+        this.servers = new ArrayList<>();
     }
 
     public void save(File file) throws JAXBException {
@@ -37,6 +40,14 @@ public class DataWrapper {
         Marshaller marshaller = context.createMarshaller();
         marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);
         marshaller.marshal(this, file);
+    }
+
+    public Window getWindow() {
+        return window;
+    }
+
+    public void setWindow(Window window) {
+        this.window = window;
     }
 
     public List<Server> getServers() {

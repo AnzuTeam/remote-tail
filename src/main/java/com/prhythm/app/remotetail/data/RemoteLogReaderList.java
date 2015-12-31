@@ -56,7 +56,7 @@ public class RemoteLogReaderList extends Observable implements ObservableList<Li
     /**
      * 待讀取的行
      */
-    transient final Set<Integer> linesToRead = Cube.newConcurrentHashSet();
+    final Set<Integer> linesToRead = Cube.newConcurrentHashSet();
     boolean stopReadTask = false;
 
     transient InvalidationListener invalidationListener;
@@ -172,7 +172,7 @@ public class RemoteLogReaderList extends Observable implements ObservableList<Li
         }
         ChannelExec channel = server.openChannel("exec");
         // 指令 sed : 顯示指定行的內容
-        String cmd = String.format("sed -n %d,%dp %s", min, max, path);
+        String cmd = String.format("sed -n %d,%dp %s", min + 1, max + 1, path);
         Logs.trace("讀取指定行(%s)", cmd);
         channel.setCommand(cmd);
         InputStream in = channel.getInputStream();

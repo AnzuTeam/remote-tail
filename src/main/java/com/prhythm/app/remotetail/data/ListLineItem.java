@@ -15,6 +15,8 @@ import javafx.scene.text.Font;
  */
 public class ListLineItem extends ListCell<Line> {
 
+    static double ROW_ID_WIDTH = 0;
+
     HBox hBox;
     Label rowId;
     Label text;
@@ -46,5 +48,8 @@ public class ListLineItem extends ListCell<Line> {
             setGraphic(hBox);
         }
 
+        ROW_ID_WIDTH = Math.max(rowId.getPrefWidth(), ROW_ID_WIDTH);
+        rowId.setPrefWidth(ROW_ID_WIDTH);
     }
+
 }

@@ -30,7 +30,7 @@
         <SplitPane dividerPositions="0.25418060200668896" prefHeight="200.0" prefWidth="200.0"
                    BorderPane.alignment="CENTER">
             <items>
-                <TreeView fx:id="areas" showRoot="false"/>
+                <TreeView fx:id="areas" showRoot="false" SplitPane.resizableWithParent="false"/>
                 <ListView fx:id="contents"/>
             </items>
         </SplitPane>

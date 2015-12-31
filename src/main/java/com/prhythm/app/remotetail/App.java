@@ -40,12 +40,13 @@ public class App extends Application {
     DataWrapper wrapper;
 
     @Override
-    public void start(Stage primaryStage) throws IOException {
+    public void start(Stage stage) throws IOException {
         FXMLLoader loader = new FXMLLoader(getClass().getResource(MainController.LAYOUT_MAIN));
-        primaryStage.setScene(new Scene(loader.load(), 800, 450));
+        stage.setTitle("Remote Tail - via JavaFX");
+        stage.setScene(new Scene(loader.load(), 800, 450));
 
         // 設定結束程式前處理作業
-        primaryStage.setOnCloseRequest(event -> {
+        stage.setOnCloseRequest(event -> {
             // 停止所有作業
             STOP_ALL_TASK = true;
 
@@ -53,6 +54,12 @@ public class App extends Application {
 
             // 結束連線
             wrapper.getServers().forEach(com.prhythm.app.remotetail.models.Server::disconnect);
+
+            wrapper.getWindow().setWidth(stage.getWidth());
+            wrapper.getWindow().setHeight(stage.getHeight());
+
+            wrapper.getWindow().setX(stage.getX());
+            wrapper.getWindow().setY(stage.getY());
 
             try {
                 // 儲存資料
@@ -64,7 +71,7 @@ public class App extends Application {
 
         // 初始化資料
         try {
-            initialize(loader);
+            initialize(stage, loader);
         } catch (JAXBException e) {
             alert("初始化資料失敗", e);
         }
@@ -73,7 +80,7 @@ public class App extends Application {
         Thread.setDefaultUncaughtExceptionHandler((t, e) -> Logs.error(e));
 
         // 顯示
-        primaryStage.show();
+        stage.show();
     }
 
     void alert(String title, Throwable ex) {
@@ -84,9 +91,20 @@ public class App extends Application {
         alert.show();
     }
 
-    void initialize(FXMLLoader loader) throws JAXBException {
+    void initialize(Stage stage, FXMLLoader loader) throws JAXBException {
         // 讀取資料
         wrapper = DataWrapper.read(new File(CONFIG_FILE));
+
+        stage.setMinWidth(400);
+        stage.setMinHeight(300);
+
+        if (wrapper != null) {
+            stage.setX(wrapper.getWindow().getX());
+            stage.setY(wrapper.getWindow().getY());
+
+            stage.setWidth(wrapper.getWindow().getWidth());
+            stage.setHeight(wrapper.getWindow().getHeight());
+        }
 
         // 取得 controller
         MainController controller = loader.getController();

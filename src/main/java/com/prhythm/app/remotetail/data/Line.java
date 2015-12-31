@@ -42,7 +42,7 @@ public class Line implements Observer {
 
     @Override
     public String toString() {
-        return loaded ? content : String.format("#%s loading...", index);
+        return content == null ? "loading..." : content;
     }
 
     @Override

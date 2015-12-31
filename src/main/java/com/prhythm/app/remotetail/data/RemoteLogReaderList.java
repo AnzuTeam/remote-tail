@@ -59,6 +59,8 @@ public class RemoteLogReaderList extends Observable implements ObservableList<Li
     transient final Set<Integer> linesToRead = Cube.newConcurrentHashSet();
     boolean stopReadTask = false;
 
+    transient InvalidationListener invalidationListener;
+
     public RemoteLogReaderList(Server server, LogPath logPath) {
         this.server = server;
         this.path = logPath;
@@ -78,7 +80,7 @@ public class RemoteLogReaderList extends Observable implements ObservableList<Li
 
     @Override
     public void addListener(InvalidationListener listener) {
-
+        this.invalidationListener = listener;
     }
 
     @Override
@@ -189,6 +191,8 @@ public class RemoteLogReaderList extends Observable implements ObservableList<Li
 
         // 通知顯示變更
         notifyObservers(path);
+
+        if (invalidationListener != null) invalidationListener.invalidated(this);
     }
 
     @Override

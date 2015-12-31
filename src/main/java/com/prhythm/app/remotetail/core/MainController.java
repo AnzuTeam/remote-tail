@@ -1,9 +1,11 @@
 package com.prhythm.app.remotetail.core;
 
+import com.prhythm.app.remotetail.data.ListLineItem;
 import com.prhythm.app.remotetail.data.RemoteLogReaderList;
 import com.prhythm.app.remotetail.models.DataWrapper;
 import com.prhythm.app.remotetail.models.LogPath;
 import com.prhythm.app.remotetail.models.Server;
+import javafx.beans.Observable;
 import javafx.beans.property.BooleanProperty;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -14,6 +16,7 @@ import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeView;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
 
 /**
@@ -76,10 +79,23 @@ public class MainController {
             Server server = (Server) parent.getValue();
 
             RemoteLogReaderList list = new RemoteLogReaderList(server, path);
+            list.addListener((Observable observable) -> {
+                // 自動重繪
+                contents.refresh();
+            });
             //noinspection unchecked
             contents.setItems(list);
             // 連接時移至底部
             contents.scrollTo(list.size() - 1);
+
+        });
+
+        // 變更呈現
+        //noinspection unchecked
+        contents.setCellFactory(param -> new ListLineItem());
+
+        // copy
+        contents.addEventFilter(KeyEvent.KEY_TYPED, event -> {
 
         });
 

@@ -1,20 +1,25 @@
 package com.prhythm.app.remotetail.data;
 
+import java.util.Observable;
+import java.util.Observer;
+
 /**
  * 資料行
  * Created by nanashi07 on 15/12/30.
  */
-public class Line {
+public class Line implements Observer {
 
     int index;
     String content;
+    boolean loaded;
 
     public Line() {
     }
 
-    public Line(int index, String content) {
+    public Line(int index, String content, boolean loaded) {
         this.index = index;
         this.content = content;
+        this.loaded = loaded;
     }
 
     public int getIndex() {
@@ -35,7 +40,11 @@ public class Line {
 
     @Override
     public String toString() {
-        return content;
+        return loaded ? content : String.format("#%s loading...", index);
     }
 
+    @Override
+    public void update(Observable o, Object arg) {
+
+    }
 }

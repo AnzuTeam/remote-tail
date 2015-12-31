@@ -3,7 +3,6 @@ package com.prhythm.app.remotetail;
 import com.jcraft.jsch.JSch;
 import com.prhythm.app.remotetail.core.MainController;
 import com.prhythm.app.remotetail.models.DataWrapper;
-import com.prhythm.app.remotetail.models.Server;
 import com.prhythm.core.generic.logging.GenericLogger;
 import com.prhythm.core.generic.logging.Level;
 import com.prhythm.core.generic.logging.LogFactory;
@@ -25,6 +24,7 @@ import java.io.IOException;
  */
 public class App extends Application {
 
+    public static boolean STOP_ALL_TASK = false;
     final static String CONFIG_FILE = "app.xml";
 
     public static void main(String[] args) {
@@ -43,17 +43,22 @@ public class App extends Application {
     public void start(Stage primaryStage) throws IOException {
         FXMLLoader loader = new FXMLLoader(getClass().getResource(MainController.LAYOUT_MAIN));
         primaryStage.setScene(new Scene(loader.load(), 800, 450));
+
+        // 設定結束程式前處理作業
         primaryStage.setOnCloseRequest(event -> {
-            // 儲存資料
+            // 停止所有作業
+            STOP_ALL_TASK = true;
+
             if (wrapper == null) return;
-            for (Server server : wrapper.getServers()) {
-                server.disconnect();
-            }
+
+            // 結束連線
+            wrapper.getServers().forEach(com.prhythm.app.remotetail.models.Server::disconnect);
 
             try {
+                // 儲存資料
                 wrapper.save(new File(CONFIG_FILE));
             } catch (JAXBException e) {
-                alert("", e);
+                alert("儲存資料失敗", e);
             }
         });
 
@@ -61,7 +66,7 @@ public class App extends Application {
         try {
             initialize(loader);
         } catch (JAXBException e) {
-            alert("", e);
+            alert("初始化資料失敗", e);
         }
 
         // 未處理錯誤

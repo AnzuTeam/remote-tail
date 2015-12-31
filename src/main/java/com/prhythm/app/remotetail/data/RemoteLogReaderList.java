@@ -1,14 +1,19 @@
 package com.prhythm.app.remotetail.data;
 
 import com.jcraft.jsch.ChannelExec;
+import com.jcraft.jsch.JSchException;
+import com.prhythm.app.remotetail.App;
 import com.prhythm.app.remotetail.models.LogPath;
 import com.prhythm.app.remotetail.models.Server;
 import com.prhythm.core.generic.data.Expirable;
 import com.prhythm.core.generic.logging.Logs;
+import com.prhythm.core.generic.util.Cube;
+import com.prhythm.core.generic.util.Streams;
 import javafx.beans.InvalidationListener;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
@@ -17,20 +22,25 @@ import java.util.concurrent.TimeUnit;
  * Log 內容
  * Created by nanashi07 on 15/12/30.
  */
-public class RemoteLogReaderList implements ObservableList<Line> {
+public class RemoteLogReaderList implements ObservableList<Line>, Runnable {
 
-    final Server server;
-    final LogPath logPath;
+    final long flush = TimeUnit.SECONDS.toMillis(2);
 
-    Expirable<Integer> lineCount = new Expirable<Integer>(TimeUnit.SECONDS.toMillis(1)) {
+    transient final Server server;
+    transient final LogPath path;
+
+    /**
+     * 檔案行數
+     */
+    transient Expirable<Integer> lineCount = new Expirable<Integer>(flush) {
         @Override
         protected Integer get() throws Exception {
             synchronized (server) {
                 if (!server.isConnected()) server.connect();
             }
-            ChannelExec exec = (ChannelExec) server.openChannel("exec");
+            ChannelExec exec = server.openChannel("exec");
             // 指令 wc : 計算檔案行數
-            String cmd = String.format("wc -l %s", logPath);
+            String cmd = String.format("wc -l %s", path);
             Logs.trace(cmd);
             exec.setCommand(cmd);
             InputStream in = exec.getInputStream();
@@ -43,14 +53,22 @@ public class RemoteLogReaderList implements ObservableList<Line> {
         }
     };
 
+    /**
+     * 待讀取的行
+     */
+    transient final Set<Integer> linesToRead = Cube.newConcurrentHashSet();
+    boolean stopReadTask = false;
+
     public RemoteLogReaderList(Server server, LogPath logPath) {
         this.server = server;
-        this.logPath = logPath;
+        this.path = logPath;
+
+        // 起始讀取作業
+        new Thread(this).start();
     }
 
     @Override
     public void addListener(ListChangeListener<? super Line> listener) {
-
     }
 
     @Override
@@ -68,7 +86,6 @@ public class RemoteLogReaderList implements ObservableList<Line> {
 
     }
 
-
     @Override
     public int size() {
         return lineCount.value();
@@ -81,11 +98,99 @@ public class RemoteLogReaderList implements ObservableList<Line> {
 
     @Override
     public Line get(int index) {
-        return new Line(index, String.valueOf(index));
+        if (path.hasLine(index)) {
+            // fixme cache line obj
+            return new Line(index, path.atLine(index), true);
+        } else {
+            linesToRead.add(index);
+            // fixme cache line obj
+            return new Line(index, null, false);
+        }
+    }
+
+    @Override
+    public void run() {
+        while (!App.STOP_ALL_TASK && !stopReadTask) {
+            if (!linesToRead.isEmpty()) {
+                try {
+                    readLines();
+                } catch (Exception e) {
+                    Logs.error("讀取 log 發生錯誤: %s", e);
+                }
+            }
+
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+                Logs.error(e);
+            }
+        }
+    }
+
+    /**
+     * 讀取暫存表中的行數
+     *
+     * @throws IOException
+     * @throws JSchException
+     */
+    void readLines() throws IOException, JSchException {
+        Cube<Integer> values;
+        // 有資料才處理
+        if (linesToRead.isEmpty()) return;
+
+        // 取得連續的行號
+        values = Cube.from(linesToRead).orderBy().takeUntil(new Cube.Predicate<Integer>() {
+            int previous;
+
+            @Override
+            public boolean predicate(Integer item, int index) {
+                if (index == 0) {
+                    previous = item;
+                    return false;
+                } else {
+                    boolean b = previous + 1 != item;
+                    previous = item;
+                    return b;
+                }
+            }
+        });
+
+        // 無資料時不執行
+        if (!values.any()) return;
+
+        // 取得最小行號及最大行號
+        int min = (int) values.min();
+        int max = (int) values.max();
+
+        // 取得檔案內容
+        synchronized (server) {
+            if (!server.isConnected()) server.connect();
+        }
+        ChannelExec exec = server.openChannel("exec");
+        // 指令 sed : 顯示指定行的內容
+        String cmd = String.format("sed -n %d,%d %s", min, max, path);
+        Logs.trace(cmd);
+        exec.setCommand(cmd);
+        InputStream in = exec.getInputStream();
+        exec.connect();
+
+        // 暫存資料
+        List<String> lines = Streams.toLines(in, "utf-8");
+        for (int i = 0; i < lines.size(); i++) {
+            path.addLine(i + min, lines.get(i));
+        }
+
+        // 移除已讀取內容
+        linesToRead.removeAll(values.toSet());
+
+        exec.disconnect();
+
+        // TODO 通知顯示變更
     }
 
     @Override
     protected void finalize() throws Throwable {
+        stopReadTask = true;
         super.finalize();
     }
 

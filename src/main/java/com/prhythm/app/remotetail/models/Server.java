@@ -21,20 +21,41 @@ import java.util.List;
 @XmlAccessorType(XmlAccessType.FIELD)
 public class Server {
 
+    /**
+     * 主機位址
+     */
     String host;
 
+    /**
+     * 通訊埠
+     */
     int port;
 
+    /**
+     * 帳號
+     */
     String account;
 
+    /**
+     * 密碼
+     */
     String password;
 
+    /**
+     * 檔案是否展開
+     */
     boolean expanded;
 
+    /**
+     * 已記錄的 log 檔
+     */
     @XmlElementWrapper(name = "logs")
     @XmlElement(name = "logPath")
     List<LogPath> logPaths;
 
+    /**
+     * SSH 連線的 {@link Session}
+     */
     transient Session session;
 
     public Server() {
@@ -49,10 +70,18 @@ public class Server {
         this.password = password;
     }
 
+    /**
+     * 檢查 SSH 是否已連線
+     *
+     * @return
+     */
     public boolean isConnected() {
         return session != null && session.isConnected();
     }
 
+    /**
+     * 連線 SSH
+     */
     public void connect() {
         try {
             JSch jsch = new JSch();
@@ -65,16 +94,27 @@ public class Server {
         }
     }
 
+    /**
+     * 中斷 SSH 連線
+     */
     public void disconnect() {
         if (session != null && session.isConnected()) {
             session.disconnect();
+
             Logs.info("Disconnect %n", this);
         }
     }
 
-    public Channel openChannel(String type) {
+    /**
+     * 開啟一個新的 {@link Channel}
+     *
+     * @param type {@link Channel} 的類型
+     * @return
+     */
+    public <T extends Channel> T openChannel(String type) {
         try {
-            return session.openChannel(type);
+            //noinspection unchecked
+            return (T) session.openChannel(type);
         } catch (JSchException e) {
             throw new RecessiveException(e.getMessage(), e);
         }
@@ -82,7 +122,10 @@ public class Server {
 
     @Override
     protected void finalize() throws Throwable {
+        // 中斷連線
         disconnect();
+        // 清除暫存的 log 內容
+        logPaths.forEach(LogPath::clearCachedLines);
         super.finalize();
     }
 

@@ -1,9 +1,11 @@
 import com.jcraft.jsch.*;
 import com.prhythm.core.generic.logging.Logs;
+import com.prhythm.core.generic.util.Cube;
 import org.junit.Test;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Set;
 
 /**
  * Created by nanashi07 on 15/12/30.
@@ -66,4 +68,26 @@ public class JchsTest {
 
     }
 
+    @Test
+    public void testOrder() {
+        Set<Integer> set = Cube.from(new int[]{1, 2, 3, 4, 5, 8, 9, 10}).toSet();
+
+        Cube<Integer> integers = Cube.from(set).orderBy().takeUntil(new Cube.Predicate<Integer>() {
+            int previous;
+
+            @Override
+            public boolean predicate(Integer item, int index) {
+                if (index == 0) {
+                    previous = item;
+                    return false;
+                } else {
+                    boolean b = previous + 1 != item;
+                    previous = item;
+                    return b;
+                }
+            }
+        });
+
+        System.out.println(integers);
+    }
 }

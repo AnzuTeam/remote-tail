@@ -1,13 +1,14 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <wrapper>
     <window>
-        <height>402.0</height>
-        <width>748.0</width>
-        <x>435.0</x>
+        <height>521.0</height>
+        <width>793.0</width>
+        <x>347.0</x>
         <y>202.0</y>
     </window>
     <servers>
         <server>
+            <name>10.64.33.95 (logs)</name>
             <host>10.64.33.95</host>
             <port>22</port>
             <account>eservice</account>

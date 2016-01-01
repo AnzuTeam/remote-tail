@@ -3,6 +3,7 @@ package com.prhythm.app.remotetail;
 import com.jcraft.jsch.JSch;
 import com.prhythm.app.remotetail.core.MainController;
 import com.prhythm.app.remotetail.models.DataWrapper;
+import com.prhythm.app.remotetail.models.Server;
 import com.prhythm.core.generic.logging.GenericLogger;
 import com.prhythm.core.generic.logging.Level;
 import com.prhythm.core.generic.logging.LogFactory;
@@ -24,8 +25,14 @@ import java.io.IOException;
  */
 public class App extends Application {
 
+    /**
+     * 停止執行的作業
+     */
     public static boolean STOP_ALL_TASK = false;
+
     final static String CONFIG_FILE = "app.xml";
+    final double MIN_WIDTH = 400;
+    final double MIN_HEIGHT = 300;
 
     public static void main(String[] args) {
         // 不處理 host key
@@ -42,8 +49,10 @@ public class App extends Application {
     @Override
     public void start(Stage stage) throws IOException {
         FXMLLoader loader = new FXMLLoader(getClass().getResource(MainController.LAYOUT_MAIN));
-        stage.setTitle("Remote Tail - via JavaFX");
-        stage.setScene(new Scene(loader.load(), 800, 450));
+        stage.setTitle("Remote Tail - via SSH");
+        stage.setScene(new Scene(loader.load(), MIN_WIDTH * 2, MIN_HEIGHT * 2));
+        stage.setMinWidth(MIN_WIDTH);
+        stage.setMinHeight(MIN_HEIGHT);
 
         // 設定結束程式前處理作業
         stage.setOnCloseRequest(event -> {
@@ -53,7 +62,7 @@ public class App extends Application {
             if (wrapper == null) return;
 
             // 結束連線
-            wrapper.getServers().forEach(com.prhythm.app.remotetail.models.Server::disconnect);
+            wrapper.getServers().forEach(Server::disconnect);
 
             wrapper.getWindow().setWidth(stage.getWidth());
             wrapper.getWindow().setHeight(stage.getHeight());
@@ -95,8 +104,6 @@ public class App extends Application {
         // 讀取資料
         wrapper = DataWrapper.read(new File(CONFIG_FILE));
 
-        stage.setMinWidth(400);
-        stage.setMinHeight(300);
 
         if (wrapper != null) {
             stage.setX(wrapper.getWindow().getX());

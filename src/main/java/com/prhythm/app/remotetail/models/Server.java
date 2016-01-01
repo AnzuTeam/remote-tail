@@ -21,6 +21,8 @@ import java.util.List;
 @XmlAccessorType(XmlAccessType.FIELD)
 public class Server {
 
+    String name;
+
     /**
      * 主機位址
      */
@@ -131,6 +133,14 @@ public class Server {
 
     // setter & getter
 
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
     public String getHost() {
         return host;
     }
@@ -181,7 +191,7 @@ public class Server {
 
     @Override
     public String toString() {
-        return host;
+        return name == null || name.trim().length() == 0 ? host : name;
     }
 
 }

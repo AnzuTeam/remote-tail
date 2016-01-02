@@ -349,7 +349,6 @@ public class MainController {
     }
 
     Node getIcon(String path) {
-        卜心竹水弓
         return new ImageView(new Image(getClass().getResourceAsStream(path)));
     }
 

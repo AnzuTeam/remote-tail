@@ -7,9 +7,13 @@ import com.prhythm.app.remotetail.models.LogPath;
 import com.prhythm.app.remotetail.models.Server;
 import com.prhythm.core.generic.data.Singleton;
 import com.prhythm.core.generic.exception.RecessiveException;
+import com.prhythm.core.generic.logging.Logs;
+import com.prhythm.core.generic.util.Cube;
 import javafx.beans.Observable;
 import javafx.beans.property.BooleanProperty;
+import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.event.Event;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
@@ -19,6 +23,7 @@ import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 
@@ -43,6 +48,8 @@ public class MainController {
     public ListView contents;
     @FXML
     public TreeView areas;
+    @FXML
+    public BorderPane addLog;
 
     ContextMenu serverMenu;
     ContextMenu logMenu;
@@ -86,11 +93,15 @@ public class MainController {
                 // 顯示 log
                 connectLogFile(event);
             } else if (event.getButton() == MouseButton.SECONDARY) {
+                // 顯示選單
                 showMenu(event);
             }
         });
 
-        // 變更呈現
+        //noinspection unchecked
+        areas.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> addLog.setDisable(newValue == null));
+
+        // 變更檔案呈現（包含行號與文字）
         //noinspection unchecked
         contents.setCellFactory(param -> new ListLineItem());
 
@@ -101,7 +112,6 @@ public class MainController {
 
         // 多選
         contents.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
-
     }
 
     void showMenu(MouseEvent event) {
@@ -116,6 +126,11 @@ public class MainController {
                 ObservableList<MenuItem> items = serverMenu.getItems();
                 MenuItem menuItem;
 
+                // 新增 log
+                menuItem = new MenuItem("Add Log");
+                menuItem.setOnAction(this::addLogClick);
+                items.add(menuItem);
+
                 // 修改
                 menuItem = new MenuItem(Singleton.of(ResourceBundle.class).getString("rmt.tree.server.context.menu.edit"));
                 menuItem.setOnAction(evt -> {
@@ -123,34 +138,7 @@ public class MainController {
                     TreeItem node = (TreeItem) areas.getSelectionModel().getSelectedItem();
                     Server server = (Server) node.getValue();
 
-                    Dialog<Server> dialog = new Dialog<>();
-                    dialog.setTitle(Singleton.of(ResourceBundle.class).getString("rmt.dialog.server.edit.title.update"));
-
-                    ServerEditorController controller;
-                    VBox content;
-
-                    try {
-                        FXMLLoader loader = new FXMLLoader(getClass().getResource(LAYOUT_SERVER_EDITOR), Singleton.of(ResourceBundle.class));
-                        content = loader.load();
-                        controller = loader.getController();
-                    } catch (IOException e) {
-                        throw new RecessiveException(e.getMessage(), e);
-                    }
-
-                    dialog.getDialogPane().setContent(content);
-                    controller.from(server);
-
-                    dialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
-
-                    dialog.setResultConverter(param -> {
-                        if (param == ButtonType.OK) {
-                            controller.update(server);
-                            areas.refresh();
-                        }
-                        return null;
-                    });
-
-                    dialog.show();
+                    createEditDialog(server);
                 });
                 items.add(menuItem);
 
@@ -193,34 +181,11 @@ public class MainController {
                     TreeItem node = (TreeItem) areas.getSelectionModel().getSelectedItem();
                     LogPath path = (LogPath) node.getValue();
 
-                    Dialog<LogPath> dialog = new Dialog<>();
-                    dialog.setTitle(Singleton.of(ResourceBundle.class).getString("rmt.dialog.log.edit.title.update"));
+                    // 向上找出 server
+                    TreeItem parent = node.getParent();
+                    Server server = (Server) parent.getValue();
 
-                    LogPathEditorController controller;
-                    HBox content;
-
-                    try {
-                        FXMLLoader loader = new FXMLLoader(getClass().getResource(LAYOUT_LOG_EDITOR), Singleton.of(ResourceBundle.class));
-                        content = loader.load();
-                        controller = loader.getController();
-                    } catch (IOException e) {
-                        throw new RecessiveException(e.getMessage(), e);
-                    }
-
-                    dialog.getDialogPane().setContent(content);
-                    controller.from(path);
-
-                    dialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
-
-                    dialog.setResultConverter(param -> {
-                        if (param == ButtonType.OK) {
-                            controller.update(path);
-                            areas.refresh();
-                        }
-                        return null;
-                    });
-
-                    dialog.show();
+                    createEditDialog(server, path);
                 });
                 items.add(menuItem);
 
@@ -255,30 +220,156 @@ public class MainController {
         }
     }
 
-    void connectLogFile(MouseEvent event) {
-        TreeItem item = (TreeItem) areas.getSelectionModel().getSelectedItem();
-        if (item == null) return;
-        Object value = item.getValue();
-        if (value == null || !(value instanceof LogPath)) return;
-        LogPath path = (LogPath) value;
+    Dialog<Server> createEditDialog(Server server) {
+        Dialog<Server> dialog = new Dialog<>();
+        dialog.setTitle(Singleton.of(ResourceBundle.class).getString("rmt.dialog.server.edit.title.update"));
 
-        TreeItem parent = item.getParent();
-        Server server = (Server) parent.getValue();
+        ServerEditorController controller;
+        VBox content;
 
-        RemoteLogReaderList list = new RemoteLogReaderList(server, path);
-        list.addListener((Observable observable) -> {
-            // 自動重繪
-            contents.refresh();
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource(LAYOUT_SERVER_EDITOR), Singleton.of(ResourceBundle.class));
+            content = loader.load();
+            controller = loader.getController();
+        } catch (IOException e) {
+            throw new RecessiveException(e.getMessage(), e);
+        }
+
+        dialog.getDialogPane().setContent(content);
+        controller.from(server);
+
+        dialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
+
+        dialog.setResultConverter(param -> {
+            if (param == ButtonType.OK) {
+                controller.update(server);
+                Logs.debug("Server 設定 %s 已更新", server);
+                return server;
+            }
+            return null;
         });
-        //noinspection unchecked
-        contents.setItems(list);
-        // 連接時移至底部
-        contents.scrollTo(list.size() - 1);
 
+        Optional<Server> result = dialog.showAndWait();
+        if (result.isPresent() && !Cube.from(Singleton.of(DataWrapper.class).getServers()).has(result.get())) {
+            Singleton.of(DataWrapper.class).getServers().add(server);
+
+            // 增加節點
+            TreeItem<Object> treeItem = new TreeItem<>(server, getIcon(ICON_SERVER));
+            treeItem.setExpanded(server.isExpanded());
+            //noinspection unchecked
+            areas.getRoot().getChildren().add(treeItem);
+        }
+
+        areas.refresh();
+
+        return dialog;
+    }
+
+    Dialog<LogPath> createEditDialog(Server server, LogPath path) {
+        Dialog<LogPath> dialog = new Dialog<>();
+        dialog.setTitle(Singleton.of(ResourceBundle.class).getString("rmt.dialog.log.edit.title.update"));
+
+        LogPathEditorController controller;
+        HBox content;
+
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource(LAYOUT_LOG_EDITOR), Singleton.of(ResourceBundle.class));
+            content = loader.load();
+            controller = loader.getController();
+        } catch (IOException e) {
+            throw new RecessiveException(e.getMessage(), e);
+        }
+
+        dialog.getDialogPane().setContent(content);
+        controller.from(path);
+
+        dialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
+
+        dialog.setResultConverter(param -> {
+            if (param == ButtonType.OK) {
+                controller.update(path);
+                Logs.debug("Log 路徑 %s 已更新", path);
+                return path;
+            }
+            return null;
+        });
+
+        Optional<LogPath> result = dialog.showAndWait();
+        if (result.isPresent() && !server.getLogPaths().contains(path)) {
+            server.getLogPaths().add(path);
+
+            // 增加節點
+            TreeItem<Object> treeItem = new TreeItem<>(path, getIcon(ICON_LOG));
+            //noinspection unchecked
+            TreeItem item = (TreeItem) Cube.from(areas.getRoot().getChildren()).first(new Cube.Predicate<TreeItem>() {
+                @Override
+                public boolean predicate(TreeItem item, int index) {
+                    return server.equals(item.getValue());
+                }
+            });
+
+            if (item != null) {
+                //noinspection unchecked
+                item.getChildren().add(treeItem);
+            }
+        }
+
+        areas.refresh();
+
+        return dialog;
+    }
+
+    void connectLogFile(MouseEvent event) {
+        new Thread(() -> {
+            TreeItem item = (TreeItem) areas.getSelectionModel().getSelectedItem();
+            if (item == null) return;
+            Object value = item.getValue();
+            if (value == null || !(value instanceof LogPath)) return;
+            LogPath path = (LogPath) value;
+
+            TreeItem parent = item.getParent();
+            Server server = (Server) parent.getValue();
+
+            RemoteLogReaderList list = new RemoteLogReaderList(server, path);
+            list.addListener((Observable observable) -> {
+                // 自動重繪
+                contents.refresh();
+            });
+            try {
+                //noinspection unchecked
+                contents.setItems(list);
+                // 連接時移至底部
+                contents.scrollTo(list.size() - 1);
+            } catch (Exception e) {
+                Logs.error(RecessiveException.unwrapp(e));
+                //noinspection unchecked
+                contents.setItems(FXCollections.observableArrayList());
+            }
+        }).start();
     }
 
     Node getIcon(String path) {
+        卜心竹水弓
         return new ImageView(new Image(getClass().getResourceAsStream(path)));
     }
 
+    public void addServerClick(Event event) {
+        createEditDialog(new Server());
+    }
+
+    public void addLogClick(Event event) {
+        TreeItem item = (TreeItem) areas.getSelectionModel().getSelectedItem();
+        Object value = item.getValue();
+        if (value instanceof Server) {
+            Server server = (Server) value;
+            createEditDialog(server, new LogPath());
+        } else if (value instanceof LogPath) {
+            Server server = (Server) item.getParent().getValue();
+            createEditDialog(server, new LogPath());
+        }
+    }
+
+    public void switchTailClick(Event event) {
+
+    }
 }

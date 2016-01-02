@@ -1,6 +1,7 @@
 package com.prhythm.app.remotetail.core;
 
 import com.prhythm.app.remotetail.models.Server;
+import com.prhythm.core.generic.util.Strings;
 import javafx.fxml.FXML;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
@@ -30,12 +31,11 @@ public class ServerEditorController {
     }
 
     public void update(Server server) {
-        server.setName(name.getText().trim());
-        server.setHost(host.getText().trim());
-        server.setPort(Integer.parseInt(port.getText()));
-        server.setAccount(account.getText().trim());
-        if (!password.getText().trim().isEmpty())
-            server.setPassword(password.getText().trim());
+        if (!Strings.isNullOrWhiteSpace(name.getText())) server.setName(name.getText().trim());
+        if (!Strings.isNullOrWhiteSpace(host.getText())) server.setHost(host.getText().trim());
+        if (!Strings.isNullOrWhiteSpace(port.getText())) server.setPort(Integer.parseInt(port.getText()));
+        if (!Strings.isNullOrWhiteSpace(account.getText())) server.setAccount(account.getText().trim());
+        if (!Strings.isNullOrWhiteSpace(password.getText())) server.setPassword(password.getText().trim());
     }
 
 }

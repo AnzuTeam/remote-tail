@@ -24,7 +24,7 @@
             </logs>
         </server>
         <server>
-            <name>aaa</name>
+            <name>aaabbcccdd</name>
             <host>10.64.33.295</host>
             <port>22</port>
             <account>eservice</account>
@@ -32,12 +32,26 @@
             <expanded>true</expanded>
             <logs>
                 <logPath>
-                    <path>3333</path>
+                    <path>qqqq</path>
                 </logPath>
                 <logPath>
-                    <path>444441111sssss</path>
+                    <path>wwwww</path>
+                </logPath>
+                <logPath>
+                    <path>111</path>
+                </logPath>
+                <logPath>
+                    <path>222</path>
                 </logPath>
             </logs>
+        </server>
+        <server>
+            <name>dd</name>
+            <host>dd</host>
+            <port>0</port>
+            <account>dfdaf</account>
+            <expanded>false</expanded>
+            <logs/>
         </server>
     </servers>
 </wrapper>

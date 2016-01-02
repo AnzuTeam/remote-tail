@@ -6,6 +6,7 @@ import com.prhythm.app.remotetail.core.MainController;
 import com.prhythm.app.remotetail.models.DataWrapper;
 import com.prhythm.app.remotetail.models.Server;
 import com.prhythm.core.generic.data.Singleton;
+import com.prhythm.core.generic.exception.RecessiveException;
 import com.prhythm.core.generic.logging.GenericLogger;
 import com.prhythm.core.generic.logging.Level;
 import com.prhythm.core.generic.logging.LogFactory;
@@ -76,10 +77,11 @@ public class App extends Application {
         // i18n
         Singleton.of(ResourceBundle.getBundle("com.prhythm.app.remotetail.bundles.ui"));
 
+        // 未處理錯誤
+        Thread.setDefaultUncaughtExceptionHandler((t, e) -> Logs.error(RecessiveException.unwrapp(e)));
+
         launch(args);
     }
-
-//    DataWrapper wrapper;
 
     @Override
     public void start(Stage stage) throws IOException {
@@ -124,9 +126,6 @@ public class App extends Application {
         } catch (JAXBException e) {
             alert("初始化資料失敗", e);
         }
-
-        // 未處理錯誤
-        Thread.setDefaultUncaughtExceptionHandler((t, e) -> Logs.error(e));
 
         // 顯示
         stage.show();

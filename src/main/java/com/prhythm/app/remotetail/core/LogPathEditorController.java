@@ -1,6 +1,7 @@
 package com.prhythm.app.remotetail.core;
 
 import com.prhythm.app.remotetail.models.LogPath;
+import com.prhythm.core.generic.util.Strings;
 import javafx.fxml.FXML;
 import javafx.scene.control.TextField;
 
@@ -18,7 +19,7 @@ public class LogPathEditorController {
     }
 
     public void update(LogPath logPath) {
-        logPath.setPath(path.getText().trim());
+        if (!Strings.isNullOrWhiteSpace(path.getText())) logPath.setPath(path.getText().trim());
     }
 
 }

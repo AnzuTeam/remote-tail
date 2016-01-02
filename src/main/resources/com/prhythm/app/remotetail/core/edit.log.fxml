@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.TextField?>
@@ -9,7 +8,7 @@
       fx:controller="com.prhythm.app.remotetail.core.LogPathEditorController"
       xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1">
     <children>
-        <Label prefHeight="27.0" text="Label">
+        <Label prefHeight="27.0" text="%rmt.dialog.log.edit.path">
             <HBox.margin>
                 <Insets bottom="3.0" left="3.0" right="3.0" top="3.0"/>
             </HBox.margin>

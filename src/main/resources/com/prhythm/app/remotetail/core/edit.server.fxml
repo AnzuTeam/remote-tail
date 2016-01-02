@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<VBox maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity"
+      fx:controller="com.prhythm.app.remotetail.core.ServerEditorController"
+      xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1">
+    <children>
+        <HBox>
+            <children>
+                <VBox>
+                    <children>
+                        <Label prefHeight="27" text="%rmt.dialog.server.edit.name">
+                            <VBox.margin>
+                                <Insets bottom="3.0" left="3.0" right="3.0" top="3.0"/>
+                            </VBox.margin>
+                        </Label>
+                        <Label prefHeight="27" text="%rmt.dialog.server.edit.host">
+                            <VBox.margin>
+                                <Insets bottom="3.0" left="3.0" right="3.0" top="3.0"/>
+                            </VBox.margin>
+                        </Label>
+                        <Label prefHeight="27" text="%rmt.dialog.server.edit.port">
+                            <VBox.margin>
+                                <Insets bottom="3.0" left="3.0" right="3.0" top="3.0"/>
+                            </VBox.margin>
+                        </Label>
+                        <Label prefHeight="27" text="%rmt.dialog.server.edit.account">
+                            <VBox.margin>
+                                <Insets bottom="3.0" left="3.0" right="3.0" top="3.0"/>
+                            </VBox.margin>
+                        </Label>
+                        <Label prefHeight="27" text="%rmt.dialog.server.edit.password">
+                            <VBox.margin>
+                                <Insets bottom="3.0" left="3.0" right="3.0" top="3.0"/>
+                            </VBox.margin>
+                        </Label>
+                    </children>
+                </VBox>
+                <VBox>
+                    <children>
+                        <TextField fx:id="name">
+                            <VBox.margin>
+                                <Insets bottom="3.0" left="3.0" right="3.0" top="3.0"/>
+                            </VBox.margin>
+                        </TextField>
+                        <TextField fx:id="host">
+                            <VBox.margin>
+                                <Insets bottom="3.0" left="3.0" right="3.0" top="3.0"/>
+                            </VBox.margin>
+                        </TextField>
+                        <TextField fx:id="port">
+                            <VBox.margin>
+                                <Insets bottom="3.0" left="3.0" right="3.0" top="3.0"/>
+                            </VBox.margin>
+                        </TextField>
+                        <TextField fx:id="account">
+                            <VBox.margin>
+                                <Insets bottom="3.0" left="3.0" right="3.0" top="3.0"/>
+                            </VBox.margin>
+                        </TextField>
+                        <PasswordField fx:id="password">
+                            <VBox.margin>
+                                <Insets bottom="3.0" left="3.0" right="3.0" top="3.0"/>
+                            </VBox.margin>
+                        </PasswordField>
+                    </children>
+                </VBox>
+            </children>
+            <padding>
+                <Insets bottom="10.0" left="20.0" right="20.0" top="10.0"/>
+            </padding>
+        </HBox>
+    </children>
+</VBox>

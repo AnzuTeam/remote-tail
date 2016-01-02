@@ -1,38 +1,91 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.geometry.Insets?>
 <?import javafx.scene.control.*?>
-<?import javafx.scene.layout.BorderPane?>
-<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0"
-            prefWidth="600.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1"
+<?import javafx.scene.image.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.Font?>
+<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity"
+            xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1"
             fx:controller="com.prhythm.app.remotetail.core.MainController">
-    <top>
-        <MenuBar BorderPane.alignment="CENTER">
-            <menus>
-                <Menu mnemonicParsing="false" text="File">
-                    <items>
-                        <MenuItem mnemonicParsing="false" text="Close"/>
-                    </items>
-                </Menu>
-                <Menu mnemonicParsing="false" text="Edit">
-                    <items>
-                        <MenuItem mnemonicParsing="false" text="Delete"/>
-                    </items>
-                </Menu>
-                <Menu mnemonicParsing="false" text="Help">
-                    <items>
-                        <MenuItem mnemonicParsing="false" text="About"/>
-                    </items>
-                </Menu>
-            </menus>
-        </MenuBar>
-    </top>
     <center>
-        <SplitPane dividerPositions="0.25" prefHeight="200.0" prefWidth="200.0"
-                   BorderPane.alignment="CENTER">
+        <SplitPane dividerPositions="0.25" BorderPane.alignment="CENTER">
             <items>
                 <TreeView fx:id="areas" showRoot="false" SplitPane.resizableWithParent="false"/>
                 <ListView fx:id="contents"/>
             </items>
         </SplitPane>
     </center>
+    <bottom>
+        <HBox BorderPane.alignment="CENTER">
+            <children>
+                <Pane HBox.hgrow="ALWAYS"/>
+                <Label text="Status"/>
+            </children>
+        </HBox>
+    </bottom>
+    <top>
+        <HBox BorderPane.alignment="CENTER">
+            <children>
+                <BorderPane>
+                    <center>
+                        <ImageView BorderPane.alignment="CENTER">
+                            <image>
+                                <Image url="/com/prhythm/app/remotetail/icons/menu_server.png"/>
+                            </image>
+                        </ImageView>
+                    </center>
+                    <bottom>
+                        <Label text="%rmt.menu.add.server" BorderPane.alignment="CENTER">
+                            <font>
+                                <Font name="System Bold" size="9.0"/>
+                            </font>
+                        </Label>
+                    </bottom>
+                    <HBox.margin>
+                        <Insets bottom="5.0" left="5.0" right="5.0" top="5.0"/>
+                    </HBox.margin>
+                </BorderPane>
+                <BorderPane>
+                    <center>
+                        <ImageView BorderPane.alignment="CENTER">
+                            <image>
+                                <Image url="/com/prhythm/app/remotetail/icons/menu_log.png"/>
+                            </image>
+                        </ImageView>
+                    </center>
+                    <bottom>
+                        <Label text="%rmt.menu.add.log" BorderPane.alignment="CENTER">
+                            <font>
+                                <Font name="System Bold" size="9.0"/>
+                            </font>
+                        </Label>
+                    </bottom>
+                    <HBox.margin>
+                        <Insets bottom="5.0" left="5.0" right="5.0" top="5.0"/>
+                    </HBox.margin>
+                </BorderPane>
+                <Pane HBox.hgrow="ALWAYS"/>
+                <BorderPane>
+                    <center>
+                        <ImageView BorderPane.alignment="CENTER">
+                            <image>
+                                <Image url="/com/prhythm/app/remotetail/icons/menu_narrow_down.png"/>
+                            </image>
+                        </ImageView>
+                    </center>
+                    <bottom>
+                        <Label text="%rmt.menu.tail.enable" BorderPane.alignment="CENTER">
+                            <font>
+                                <Font name="System Bold" size="9.0"/>
+                            </font>
+                        </Label>
+                    </bottom>
+                    <HBox.margin>
+                        <Insets bottom="5.0" left="5.0" right="5.0" top="5.0"/>
+                    </HBox.margin>
+                </BorderPane>
+            </children>
+        </HBox>
+    </top>
 </BorderPane>

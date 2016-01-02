@@ -1,9 +1,11 @@
 package com.prhythm.app.remotetail;
 
 import com.jcraft.jsch.JSch;
+import com.jcraft.jsch.Logger;
 import com.prhythm.app.remotetail.core.MainController;
 import com.prhythm.app.remotetail.models.DataWrapper;
 import com.prhythm.app.remotetail.models.Server;
+import com.prhythm.core.generic.data.Singleton;
 import com.prhythm.core.generic.logging.GenericLogger;
 import com.prhythm.core.generic.logging.Level;
 import com.prhythm.core.generic.logging.LogFactory;
@@ -18,6 +20,7 @@ import javafx.stage.Stage;
 import javax.xml.bind.JAXBException;
 import java.io.File;
 import java.io.IOException;
+import java.util.ResourceBundle;
 
 /**
  * 啟動程式
@@ -38,17 +41,53 @@ public class App extends Application {
         // 不處理 host key
         JSch.setConfig("StrictHostKeyChecking", "no");
 
+        // logs
+        JSch.setLogger(new Logger() {
+            @Override
+            public boolean isEnabled(int level) {
+                return true;
+            }
+
+            @Override
+            public void log(int level, String message) {
+                switch (level) {
+                    case Logger.DEBUG:
+                        Logs.debug(message);
+                        break;
+                    case Logger.INFO:
+                        Logs.info(message);
+                        break;
+                    case Logger.WARN:
+                        Logs.warn(message);
+                        break;
+                    case Logger.ERROR:
+                        Logs.error(message);
+                        break;
+                    case Logger.FATAL:
+                        Logs.fatal(message);
+                        break;
+                }
+            }
+        });
+
         // log
         new Logs().setLogFactory(new LogFactory(new GenericLogger(Level.Trace)));
+
+        // i18n
+        Singleton.of(ResourceBundle.getBundle("com.prhythm.app.remotetail.bundles.ui"));
 
         launch(args);
     }
 
-    DataWrapper wrapper;
+//    DataWrapper wrapper;
 
     @Override
     public void start(Stage stage) throws IOException {
-        FXMLLoader loader = new FXMLLoader(getClass().getResource(MainController.LAYOUT_MAIN));
+        FXMLLoader loader = Singleton.of(new FXMLLoader(
+                getClass().getResource(MainController.LAYOUT_MAIN),
+                Singleton.of(ResourceBundle.class)
+        ));
+
         stage.setTitle("Remote Tail - via SSH");
         stage.setScene(new Scene(loader.load(), MIN_WIDTH * 2, MIN_HEIGHT * 2));
         stage.setMinWidth(MIN_WIDTH);
@@ -59,6 +98,7 @@ public class App extends Application {
             // 停止所有作業
             STOP_ALL_TASK = true;
 
+            DataWrapper wrapper = Singleton.of(DataWrapper.class);
             if (wrapper == null) return;
 
             // 結束連線
@@ -80,7 +120,7 @@ public class App extends Application {
 
         // 初始化資料
         try {
-            initialize(stage, loader);
+            initialize(stage);
         } catch (JAXBException e) {
             alert("初始化資料失敗", e);
         }
@@ -100,9 +140,9 @@ public class App extends Application {
         alert.show();
     }
 
-    void initialize(Stage stage, FXMLLoader loader) throws JAXBException {
+    void initialize(Stage stage) throws JAXBException {
         // 讀取資料
-        wrapper = DataWrapper.read(new File(CONFIG_FILE));
+        DataWrapper wrapper = Singleton.of(DataWrapper.read(new File(CONFIG_FILE)));
 
 
         if (wrapper != null) {
@@ -114,7 +154,7 @@ public class App extends Application {
         }
 
         // 取得 controller
-        MainController controller = loader.getController();
+        MainController controller = Singleton.of(FXMLLoader.class).getController();
         controller.load(wrapper);
     }
 

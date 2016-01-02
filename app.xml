@@ -4,7 +4,7 @@
         <height>521.0</height>
         <width>793.0</width>
         <x>347.0</x>
-        <y>202.0</y>
+        <y>201.0</y>
     </window>
     <servers>
         <server>
@@ -24,6 +24,7 @@
             </logs>
         </server>
         <server>
+            <name>aaa</name>
             <host>10.64.33.295</host>
             <port>22</port>
             <account>eservice</account>
@@ -34,7 +35,7 @@
                     <path>3333</path>
                 </logPath>
                 <logPath>
-                    <path>44444</path>
+                    <path>444441111sssss</path>
                 </logPath>
             </logs>
         </server>

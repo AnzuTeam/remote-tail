@@ -5,19 +5,26 @@ import com.prhythm.app.remotetail.data.RemoteLogReaderList;
 import com.prhythm.app.remotetail.models.DataWrapper;
 import com.prhythm.app.remotetail.models.LogPath;
 import com.prhythm.app.remotetail.models.Server;
+import com.prhythm.core.generic.data.Singleton;
+import com.prhythm.core.generic.exception.RecessiveException;
 import javafx.beans.Observable;
 import javafx.beans.property.BooleanProperty;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
-import javafx.scene.control.ListView;
-import javafx.scene.control.SelectionMode;
-import javafx.scene.control.TreeItem;
-import javafx.scene.control.TreeView;
+import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyEvent;
+import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.VBox;
+
+import java.io.IOException;
+import java.util.Optional;
+import java.util.ResourceBundle;
 
 /**
  * 主介面
@@ -26,13 +33,19 @@ import javafx.scene.input.MouseEvent;
 public class MainController {
 
     final public static String LAYOUT_MAIN = "/com/prhythm/app/remotetail/core/main.fxml";
-    final public static String ICON_SERVER = "/com/prhythm/app/icons/icon_server.png";
-    final public static String ICON_LOG = "/com/prhythm/app/icons/icon_log.png";
+    final public static String LAYOUT_SERVER_EDITOR = "/com/prhythm/app/remotetail/core/edit.server.fxml";
+    final public static String LAYOUT_LOG_EDITOR = "/com/prhythm/app/remotetail/core/edit.log.fxml";
+
+    final public static String ICON_SERVER = "/com/prhythm/app/remotetail/icons/icon_server.png";
+    final public static String ICON_LOG = "/com/prhythm/app/remotetail/icons/icon_log.png";
 
     @FXML
     public ListView contents;
     @FXML
     public TreeView areas;
+
+    ContextMenu serverMenu;
+    ContextMenu logMenu;
 
     public void load(DataWrapper wrapper) {
         // 載入設定
@@ -69,25 +82,12 @@ public class MainController {
 
         // 註冊點選 log 事件
         areas.addEventFilter(MouseEvent.MOUSE_CLICKED, event -> {
-            TreeItem item = (TreeItem) areas.getSelectionModel().getSelectedItem();
-            if (item == null) return;
-            Object value = item.getValue();
-            if (value == null || !(value instanceof LogPath)) return;
-            LogPath path = (LogPath) value;
-
-            TreeItem parent = item.getParent();
-            Server server = (Server) parent.getValue();
-
-            RemoteLogReaderList list = new RemoteLogReaderList(server, path);
-            list.addListener((Observable observable) -> {
-                // 自動重繪
-                contents.refresh();
-            });
-            //noinspection unchecked
-            contents.setItems(list);
-            // 連接時移至底部
-            contents.scrollTo(list.size() - 1);
-
+            if (event.getButton() == MouseButton.PRIMARY) {
+                // 顯示 log
+                connectLogFile(event);
+            } else if (event.getButton() == MouseButton.SECONDARY) {
+                showMenu(event);
+            }
         });
 
         // 變更呈現
@@ -101,6 +101,180 @@ public class MainController {
 
         // 多選
         contents.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
+
+    }
+
+    void showMenu(MouseEvent event) {
+        TreeItem treeNode = (TreeItem) areas.getSelectionModel().getSelectedItem();
+        if (treeNode == null) return;
+        Object value = treeNode.getValue();
+        if (value instanceof Server) {
+            if (serverMenu != null) serverMenu.hide();
+            if (logMenu != null) logMenu.hide();
+            if (serverMenu == null) {
+                serverMenu = new ContextMenu();
+                ObservableList<MenuItem> items = serverMenu.getItems();
+                MenuItem menuItem;
+
+                // 修改
+                menuItem = new MenuItem(Singleton.of(ResourceBundle.class).getString("rmt.tree.server.context.menu.edit"));
+                menuItem.setOnAction(evt -> {
+                    // 重新取值
+                    TreeItem node = (TreeItem) areas.getSelectionModel().getSelectedItem();
+                    Server server = (Server) node.getValue();
+
+                    Dialog<Server> dialog = new Dialog<>();
+                    dialog.setTitle(Singleton.of(ResourceBundle.class).getString("rmt.dialog.server.edit.title.update"));
+
+                    ServerEditorController controller;
+                    VBox content;
+
+                    try {
+                        FXMLLoader loader = new FXMLLoader(getClass().getResource(LAYOUT_SERVER_EDITOR), Singleton.of(ResourceBundle.class));
+                        content = loader.load();
+                        controller = loader.getController();
+                    } catch (IOException e) {
+                        throw new RecessiveException(e.getMessage(), e);
+                    }
+
+                    dialog.getDialogPane().setContent(content);
+                    controller.from(server);
+
+                    dialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
+
+                    dialog.setResultConverter(param -> {
+                        if (param == ButtonType.OK) {
+                            controller.update(server);
+                            areas.refresh();
+                        }
+                        return null;
+                    });
+
+                    dialog.show();
+                });
+                items.add(menuItem);
+
+                // 刪除
+                menuItem = new MenuItem(Singleton.of(ResourceBundle.class).getString("rmt.tree.server.context.menu.delete"));
+                menuItem.setOnAction(evt -> {
+                    // 重新取值
+                    TreeItem node = (TreeItem) areas.getSelectionModel().getSelectedItem();
+                    Server server = (Server) node.getValue();
+
+                    Alert alert = new Alert(
+                            Alert.AlertType.CONFIRMATION,
+                            String.format(Singleton.of(ResourceBundle.class).getString("rmt.dialog.delete.server"), server),
+                            ButtonType.YES, ButtonType.NO
+                    );
+                    Optional<ButtonType> result = alert.showAndWait();
+                    if (result.isPresent() && result.get() == ButtonType.YES) {
+                        // 移除資料
+                        Singleton.of(DataWrapper.class).getServers().remove(server);
+                        // 移除顯示
+                        node.getParent().getChildren().remove(node);
+                    }
+                });
+                items.add(menuItem);
+            }
+
+            serverMenu.show(areas, event.getScreenX(), event.getScreenY());
+        } else if (value instanceof LogPath) {
+            if (serverMenu != null) serverMenu.hide();
+            if (logMenu != null) logMenu.hide();
+            if (logMenu == null) {
+                logMenu = new ContextMenu();
+                ObservableList<MenuItem> items = logMenu.getItems();
+                MenuItem menuItem;
+
+                // 修改
+                menuItem = new MenuItem(Singleton.of(ResourceBundle.class).getString("rmt.tree.log.context.menu.edit"));
+                menuItem.setOnAction(evt -> {
+                    // 重新取值
+                    TreeItem node = (TreeItem) areas.getSelectionModel().getSelectedItem();
+                    LogPath path = (LogPath) node.getValue();
+
+                    Dialog<LogPath> dialog = new Dialog<>();
+                    dialog.setTitle(Singleton.of(ResourceBundle.class).getString("rmt.dialog.log.edit.title.update"));
+
+                    LogPathEditorController controller;
+                    HBox content;
+
+                    try {
+                        FXMLLoader loader = new FXMLLoader(getClass().getResource(LAYOUT_LOG_EDITOR), Singleton.of(ResourceBundle.class));
+                        content = loader.load();
+                        controller = loader.getController();
+                    } catch (IOException e) {
+                        throw new RecessiveException(e.getMessage(), e);
+                    }
+
+                    dialog.getDialogPane().setContent(content);
+                    controller.from(path);
+
+                    dialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
+
+                    dialog.setResultConverter(param -> {
+                        if (param == ButtonType.OK) {
+                            controller.update(path);
+                            areas.refresh();
+                        }
+                        return null;
+                    });
+
+                    dialog.show();
+                });
+                items.add(menuItem);
+
+                // 刪除
+                menuItem = new MenuItem(Singleton.of(ResourceBundle.class).getString("rmt.tree.log.context.menu.delete"));
+                menuItem.setOnAction(evt -> {
+                    // 重新取值
+                    TreeItem node = (TreeItem) areas.getSelectionModel().getSelectedItem();
+                    LogPath path = (LogPath) node.getValue();
+
+                    Alert alert = new Alert(
+                            Alert.AlertType.CONFIRMATION,
+                            String.format(Singleton.of(ResourceBundle.class).getString("rmt.dialog.delete.log"), path),
+                            ButtonType.YES, ButtonType.NO
+                    );
+                    Optional<ButtonType> result = alert.showAndWait();
+                    if (result.isPresent() && result.get() == ButtonType.YES) {
+                        // 向上找出 server
+                        TreeItem parent = node.getParent();
+                        Server server = (Server) parent.getValue();
+
+                        // 移除資料
+                        server.getLogPaths().remove(path);
+                        // 移除顯示
+                        node.getParent().getChildren().remove(node);
+                    }
+                });
+                items.add(menuItem);
+            }
+
+            logMenu.show(areas, event.getScreenX(), event.getScreenY());
+        }
+    }
+
+    void connectLogFile(MouseEvent event) {
+        TreeItem item = (TreeItem) areas.getSelectionModel().getSelectedItem();
+        if (item == null) return;
+        Object value = item.getValue();
+        if (value == null || !(value instanceof LogPath)) return;
+        LogPath path = (LogPath) value;
+
+        TreeItem parent = item.getParent();
+        Server server = (Server) parent.getValue();
+
+        RemoteLogReaderList list = new RemoteLogReaderList(server, path);
+        list.addListener((Observable observable) -> {
+            // 自動重繪
+            contents.refresh();
+        });
+        //noinspection unchecked
+        contents.setItems(list);
+        // 連接時移至底部
+        contents.scrollTo(list.size() - 1);
+
     }
 
     Node getIcon(String path) {

@@ -190,6 +190,27 @@ public class Server {
     }
 
     @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Server server = (Server) o;
+
+        if (port != server.port) return false;
+        if (!host.equals(server.host)) return false;
+        return account.equals(server.account);
+
+    }
+
+    @Override
+    public int hashCode() {
+        int result = host.hashCode();
+        result = 31 * result + port;
+        result = 31 * result + account.hashCode();
+        return result;
+    }
+
+    @Override
     public String toString() {
         return name == null || name.trim().length() == 0 ? host : name;
     }

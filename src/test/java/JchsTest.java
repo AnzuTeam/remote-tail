@@ -37,6 +37,11 @@ public class JchsTest {
     }
 
     @Test
+    public void test01() {
+        JSch jsch = new JSch();
+    }
+
+    @Test
     public void testConnection() throws JSchException, InterruptedException, IOException {
         JSch jsch = new JSch();
         Session session = jsch.getSession(account, host, port);

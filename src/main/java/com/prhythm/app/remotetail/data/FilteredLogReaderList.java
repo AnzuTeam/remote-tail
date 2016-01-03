@@ -3,9 +3,11 @@ package com.prhythm.app.remotetail.data;
 import com.jcraft.jsch.ChannelExec;
 import com.jcraft.jsch.JSchException;
 import com.prhythm.app.remotetail.App;
+import com.prhythm.app.remotetail.models.DataWrapper;
 import com.prhythm.app.remotetail.models.LogPath;
 import com.prhythm.app.remotetail.models.Server;
 import com.prhythm.core.generic.data.Once;
+import com.prhythm.core.generic.data.Singleton;
 import com.prhythm.core.generic.exception.RecessiveException;
 import com.prhythm.core.generic.logging.Logs;
 import com.prhythm.core.generic.util.Cube;
@@ -46,7 +48,11 @@ public class FilteredLogReaderList extends Observable implements ObservableList<
             exec.connect();
 
             List<Integer> result = new ArrayList<>();
-            result.addAll(Cube.from(Streams.toLines(in, "utf-8")).notNull().select((item, index) -> Integer.parseInt(item.trim())).toList());
+            List<Integer> values = Cube.from(Streams.toLines(in, Singleton.of(DataWrapper.class).getPreference().getCharset()))
+                    .notNull()
+                    .select((item, index) -> Integer.parseInt(item.trim()))
+                    .toList();
+            result.addAll(values);
 
             exec.disconnect();
 
@@ -239,7 +245,7 @@ public class FilteredLogReaderList extends Observable implements ObservableList<
         channel.connect();
 
         // 暫存資料
-        List<String> lines = Streams.toLines(in, "utf-8");
+        List<String> lines = Streams.toLines(in, Singleton.of(DataWrapper.class).getPreference().getCharset());
         channel.disconnect();
 
         for (int i = 0; i < lines.size(); i++) {

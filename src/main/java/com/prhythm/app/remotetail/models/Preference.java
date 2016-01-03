@@ -19,16 +19,14 @@ public class Preference {
      */
     double fontSize;
     /**
-     * log 層級
+     * 編碼
      */
-    String logLevel;
-
     String charset;
 
     public Preference() {
         this.fontFamily = "Courier New";
         this.fontSize = 13;
-        this.logLevel = "Info";
+        this.charset = "utf-8";
     }
 
     public double getFontSize() {
@@ -47,12 +45,11 @@ public class Preference {
         this.fontFamily = fontFamily;
     }
 
-    public String getLogLevel() {
-        return logLevel;
+    public String getCharset() {
+        return charset;
     }
 
-    public void setLogLevel(String logLevel) {
-        this.logLevel = logLevel;
+    public void setCharset(String charset) {
+        this.charset = charset;
     }
-
 }

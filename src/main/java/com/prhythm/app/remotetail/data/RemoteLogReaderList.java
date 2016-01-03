@@ -3,9 +3,11 @@ package com.prhythm.app.remotetail.data;
 import com.jcraft.jsch.ChannelExec;
 import com.jcraft.jsch.JSchException;
 import com.prhythm.app.remotetail.App;
+import com.prhythm.app.remotetail.models.DataWrapper;
 import com.prhythm.app.remotetail.models.LogPath;
 import com.prhythm.app.remotetail.models.Server;
 import com.prhythm.core.generic.data.Expirable;
+import com.prhythm.core.generic.data.Singleton;
 import com.prhythm.core.generic.exception.RecessiveException;
 import com.prhythm.core.generic.logging.Logs;
 import com.prhythm.core.generic.util.Cube;
@@ -241,7 +243,7 @@ public class RemoteLogReaderList extends Observable implements ObservableList<Li
         channel.connect();
 
         // 暫存資料
-        List<String> lines = Streams.toLines(in, "utf-8");
+        List<String> lines = Streams.toLines(in, Singleton.of(DataWrapper.class).getPreference().getCharset());
         channel.disconnect();
 
         for (int i = 0; i < lines.size(); i++) {

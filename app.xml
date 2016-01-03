@@ -9,7 +9,7 @@
     <preference>
         <fontFamily>Courier New</fontFamily>
         <fontSize>13.0</fontSize>
-        <logLevel>Info</logLevel>
+        <charset>utf-8</charset>
     </preference>
     <servers>
         <server>

@@ -19,7 +19,7 @@
                     <top>
                         <HBox fx:id="searchBar" BorderPane.alignment="CENTER" managed="false" visible="false">
                             <children>
-                                <TextField HBox.hgrow="ALWAYS" fx:id="searchText" onKeyPressed="#exitTrigger"/>
+                                <TextField HBox.hgrow="ALWAYS" fx:id="searchText" onKeyPressed="#searchTrigger"/>
                                 <Button mnemonicParsing="false" text="%rmt.search.button" onAction="#searchClick"/>
                             </children>
                         </HBox>

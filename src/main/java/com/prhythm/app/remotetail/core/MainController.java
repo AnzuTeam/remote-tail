@@ -407,12 +407,21 @@ public class MainController {
      * @param event
      */
     void connectLogFile(MouseEvent event) {
+        // 關閉搜尋
+        searchText.setText("");
+        searchBar.setManaged(false);
+        searchBar.setVisible(false);
+
         new Thread(() -> {
             TreeItem item = (TreeItem) areas.getSelectionModel().getSelectedItem();
             OutContent<Server> server = new OutContent<>();
             OutContent<LogPath> log = new OutContent<>();
             findValue(item, server, log);
             if (!log.present()) return;
+
+            synchronized (server.value()) {
+                if (!server.value().isConnected()) server.value().connect();
+            }
 
             RemoteLogReaderList list = new RemoteLogReaderList(server.value(), log.value());
             list.addListener((Observable observable) -> {
@@ -477,7 +486,8 @@ public class MainController {
      *
      * @param event
      */
-    public void addServerClick(Event event) {
+    @FXML
+    void addServerClick(Event event) {
         createEditDialog(new Server());
     }
 
@@ -486,7 +496,8 @@ public class MainController {
      *
      * @param event
      */
-    public void addLogClick(Event event) {
+    @FXML
+    void addLogClick(Event event) {
         TreeItem item = (TreeItem) areas.getSelectionModel().getSelectedItem();
         OutContent<Server> server = new OutContent<>();
         OutContent<LogPath> log = new OutContent<>();
@@ -506,7 +517,8 @@ public class MainController {
      *
      * @param event
      */
-    public void switchTailClick(Event event) {
+    @FXML
+    void switchTailClick(Event event) {
         Logs.trace("開始追蹤檔尾");
         setTailing(true);
         new Thread(() -> {
@@ -537,7 +549,8 @@ public class MainController {
      *
      * @param event
      */
-    public void preferenceClick(Event event) {
+    @FXML
+    void preferenceClick(Event event) {
         // todo
     }
 
@@ -546,7 +559,8 @@ public class MainController {
      *
      * @param event
      */
-    public void disconnectClick(Event event) {
+    @FXML
+    void disconnectClick(Event event) {
         TreeItem item = (TreeItem) areas.getSelectionModel().getSelectedItem();
         OutContent<Server> server = new OutContent<>();
         OutContent<LogPath> log = new OutContent<>();
@@ -567,7 +581,8 @@ public class MainController {
      *
      * @param event
      */
-    public void hotKeyTrigger(KeyEvent event) {
+    @FXML
+    void hotKeyTrigger(KeyEvent event) {
         // 複制文字
         if ("c".equalsIgnoreCase(event.getCharacter()) && (event.isMetaDown() || event.isControlDown())) {
             //noinspection unchecked
@@ -597,7 +612,8 @@ public class MainController {
      *
      * @param tailing
      */
-    public void setTailing(boolean tailing) {
+    @FXML
+    void setTailing(boolean tailing) {
         this.tailing = tailing;
         tail.setDisable(!tailing);
     }
@@ -607,7 +623,8 @@ public class MainController {
      *
      * @param event
      */
-    public void exitTrigger(KeyEvent event) {
+    @FXML
+    void searchTrigger(KeyEvent event) {
         if (event.getCode() == KeyCode.ESCAPE) {
             searchText.setText("");
             searchBar.setManaged(false);
@@ -625,7 +642,8 @@ public class MainController {
      *
      * @param actionEvent
      */
-    public void searchClick(ActionEvent actionEvent) {
+    @FXML
+    void searchClick(ActionEvent actionEvent) {
         if (searchText.getText().trim().isEmpty()) {
             return;
         }

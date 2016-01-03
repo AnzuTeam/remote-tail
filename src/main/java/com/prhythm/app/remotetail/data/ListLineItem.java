@@ -51,7 +51,7 @@ public class ListLineItem extends ListCell<Line> {
             setGraphic(null);
         } else {
             String num = String.valueOf(item.getIndex());
-            MAX_INDEX_WIDTH = Math.max(MAX_INDEX_WIDTH, num.length() * rowId.getFont().getSize() * 0.8);
+            MAX_INDEX_WIDTH = Math.max(MAX_INDEX_WIDTH, num.length() * rowId.getFont().getSize());
 
             rowId.setText(num);
             rowId.setPrefWidth(MAX_INDEX_WIDTH);

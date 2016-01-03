@@ -19,7 +19,7 @@ import javafx.scene.text.Font;
  */
 public class ListLineItem extends ListCell<Line> {
 
-    static double INDEX_COUNT = 0;
+    static double MAX_INDEX_WIDTH = 0;
 
     HBox hBox;
     Label rowId;
@@ -50,14 +50,17 @@ public class ListLineItem extends ListCell<Line> {
             text.setText(null);
             setGraphic(null);
         } else {
-            INDEX_COUNT = Math.max(INDEX_COUNT, String.valueOf(item.getIndex()).length());
+            String num = String.valueOf(item.getIndex());
+            MAX_INDEX_WIDTH = Math.max(MAX_INDEX_WIDTH, num.length() * rowId.getFont().getSize() * 0.8);
 
-            rowId.setText(String.valueOf(item.getIndex() + 1));
+            rowId.setText(num);
+            rowId.setPrefWidth(MAX_INDEX_WIDTH);
+
             text.setText(item.toString());
+
             setGraphic(hBox);
         }
 
-        rowId.setPrefWidth(rowId.getFont().getSize() * INDEX_COUNT * 0.8);
     }
 
 }

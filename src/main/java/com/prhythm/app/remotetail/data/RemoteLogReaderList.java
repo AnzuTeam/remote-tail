@@ -40,6 +40,7 @@ public class RemoteLogReaderList extends Observable implements ObservableList<Li
                 if (!server.isConnected()) server.connect();
             }
             ChannelExec exec = server.openChannel("exec");
+            exec.setErrStream(System.err);
             // 指令 wc : 計算檔案行數
             String cmd = String.format("wc -l %s", path);
             Logs.trace("計算行數(%s)", cmd);
@@ -94,6 +95,9 @@ public class RemoteLogReaderList extends Observable implements ObservableList<Li
 
     @Override
     public Line get(int index) {
+        // 序號由 1 開始
+        index = index + 1;
+
         if (path.hasLine(index)) {
             return new Line(index, path.atLine(index), true);
         } else {
@@ -219,8 +223,8 @@ public class RemoteLogReaderList extends Observable implements ObservableList<Li
         if (!values.any()) return;
 
         // 取得最小行號及最大行號
-        int min = (int) values.min();
-        int max = (int) values.max();
+        int min = (int) Math.max(1, values.min());
+        int max = (int) Math.max(1, values.max());
 
         // 連線
         synchronized (server) {
@@ -230,7 +234,7 @@ public class RemoteLogReaderList extends Observable implements ObservableList<Li
         // 取得檔案內容
         ChannelExec channel = server.openChannel("exec");
         // 指令 sed : 顯示指定行的內容
-        String cmd = String.format("sed -n %d,%dp %s", min + 1, max + 1, path);
+        String cmd = String.format("sed -n %d,%dp %s", min, max, path);
         Logs.trace("讀取指定行(%s)", cmd);
         channel.setCommand(cmd);
         InputStream in = channel.getInputStream();
@@ -241,7 +245,9 @@ public class RemoteLogReaderList extends Observable implements ObservableList<Li
         channel.disconnect();
 
         for (int i = 0; i < lines.size(); i++) {
-            path.addLine(i + min, lines.get(i));
+            synchronized (path) {
+                path.addLine(i + min, lines.get(i));
+            }
         }
 
         // 移除已讀取內容

@@ -316,11 +316,11 @@ public class MainController {
         dialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
 
         dialog.setResultConverter(param -> {
-            if (param == ButtonType.OK) {
-                controller.update(server);
+            if (param == ButtonType.OK && controller.update(server)) {
                 Logs.debug("Server 設定 %s 已更新", server);
                 return server;
             }
+            // todo 狀態錯誤
             return null;
         });
 
@@ -368,11 +368,11 @@ public class MainController {
         dialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
 
         dialog.setResultConverter(param -> {
-            if (param == ButtonType.OK) {
-                controller.update(path);
+            if (param == ButtonType.OK && controller.update(path)) {
                 Logs.debug("Log 路徑 %s 已更新", path);
                 return path;
             }
+            // todo 顯示狀態錯誤
             return null;
         });
 

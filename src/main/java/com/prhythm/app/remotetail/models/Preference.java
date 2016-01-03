@@ -23,6 +23,8 @@ public class Preference {
      */
     String logLevel;
 
+    String charset;
+
     public Preference() {
         this.fontFamily = "Courier New";
         this.fontSize = 13;

@@ -92,11 +92,9 @@ public class FilteredLogReaderList extends Observable implements ObservableList<
     }
 
     @Override
-    public Line get(int index) {
-        if (linesMatched.value().size() == 0) return null;
-
+    public Line get(int i) {
         // 取得實際資料行號
-        index = linesMatched.value().get(index);
+        int index = linesMatched.value().get(i);
 
         if (path.hasLine(index)) {
             return new Line(index, path.atLine(index), true);
@@ -223,8 +221,8 @@ public class FilteredLogReaderList extends Observable implements ObservableList<
         if (!values.any()) return;
 
         // 取得最小行號及最大行號
-        int min = (int) values.min();
-        int max = (int) values.max();
+        int min = (int) Math.max(1, values.min());
+        int max = (int) Math.max(1, values.max());
 
         // 連線
         synchronized (server) {
@@ -234,7 +232,7 @@ public class FilteredLogReaderList extends Observable implements ObservableList<
         // 取得檔案內容
         ChannelExec channel = server.openChannel("exec");
         // 指令 sed : 顯示指定行的內容
-        String cmd = String.format("sed -n %d,%dp %s", min + 1, max + 1, path);
+        String cmd = String.format("sed -n %d,%dp %s", min, max, path);
         Logs.trace("讀取指定行(%s)", cmd);
         channel.setCommand(cmd);
         InputStream in = channel.getInputStream();
@@ -245,7 +243,9 @@ public class FilteredLogReaderList extends Observable implements ObservableList<
         channel.disconnect();
 
         for (int i = 0; i < lines.size(); i++) {
-            path.addLine(i + min, lines.get(i));
+            synchronized (path) {
+                path.addLine(i + min, lines.get(i));
+            }
         }
 
         // 移除已讀取內容

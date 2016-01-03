@@ -105,7 +105,7 @@
                     </HBox.margin>
                 </BorderPane>
                 <Pane HBox.hgrow="ALWAYS"/>
-                <BorderPane onMouseClicked="#switchTailClick" disable="true">
+                <BorderPane onMouseClicked="#switchTailClick">
                     <center>
                         <ImageView BorderPane.alignment="CENTER">
                             <image>
@@ -114,7 +114,7 @@
                         </ImageView>
                     </center>
                     <bottom>
-                        <Label text="%rmt.menu.tail.enable" BorderPane.alignment="CENTER">
+                        <Label fx:id="tail" text="%rmt.menu.tail.enable" BorderPane.alignment="CENTER" disable="true">
                             <font>
                                 <Font name="System Bold" size="9.0"/>
                             </font>

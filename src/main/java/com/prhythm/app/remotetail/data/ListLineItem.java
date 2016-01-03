@@ -47,7 +47,7 @@ public class ListLineItem extends ListCell<Line> {
         } else {
             INDEX_COUNT = Math.max(INDEX_COUNT, String.valueOf(item.getIndex()).length());
 
-            rowId.setText(String.valueOf(item.getIndex()));
+            rowId.setText(String.valueOf(item.getIndex() + 1));
             text.setText(item.toString());
             setGraphic(hBox);
         }

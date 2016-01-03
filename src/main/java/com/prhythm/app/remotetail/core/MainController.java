@@ -1,5 +1,6 @@
 package com.prhythm.app.remotetail.core;
 
+import com.prhythm.app.remotetail.App;
 import com.prhythm.app.remotetail.data.Line;
 import com.prhythm.app.remotetail.data.ListLineItem;
 import com.prhythm.app.remotetail.data.RemoteLogReaderList;
@@ -10,6 +11,7 @@ import com.prhythm.core.generic.data.OutContent;
 import com.prhythm.core.generic.data.Singleton;
 import com.prhythm.core.generic.exception.RecessiveException;
 import com.prhythm.core.generic.logging.Logs;
+import com.prhythm.core.generic.util.Boxings;
 import com.prhythm.core.generic.util.Cube;
 import com.prhythm.core.generic.util.Delimiters;
 import javafx.application.Platform;
@@ -18,6 +20,7 @@ import javafx.beans.property.BooleanProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.Event;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
@@ -28,6 +31,8 @@ import javafx.scene.input.*;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
+import javafx.stage.Stage;
+import javafx.stage.WindowEvent;
 
 import java.io.IOException;
 import java.util.Optional;
@@ -54,9 +59,13 @@ public class MainController {
     BorderPane addLog;
     @FXML
     BorderPane disconnect;
+    @FXML
+    Label tail;
 
     ContextMenu serverMenu;
     ContextMenu logMenu;
+
+    boolean tailing = true;
 
     public void load(DataWrapper wrapper) {
         // 載入設定
@@ -120,13 +129,29 @@ public class MainController {
         //noinspection unchecked
         contents.setCellFactory(param -> new ListLineItem());
 
-        // copy
-        contents.addEventFilter(KeyEvent.KEY_TYPED, event -> {
-
-        });
-
         // 多選
         contents.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
+
+        // 捲動時停止 tail
+        Singleton.of(Stage.class).setOnShown(new EventHandler<WindowEvent>() {
+
+            boolean done = false;
+
+            @Override
+            public void handle(WindowEvent event) {
+                if (done) return;
+                Cube.from(contents.lookupAll(".scroll-bar"))
+                        .where((item, index) -> item instanceof ScrollBar)
+                        .ofType(ScrollBar.class)
+                        .each((item, index) -> {
+                            item.valueProperty().addListener((value, oldValue, newValue) -> {
+                                // fixme 有時會影響按下 tail 功能
+                                setTailing(false);
+                            });
+                            return true;
+                        });
+            }
+        });
     }
 
     void flushDisconnectStatus(TreeItem item) {
@@ -396,10 +421,26 @@ public class MainController {
                     contents.setItems(FXCollections.observableArrayList());
                 }
                 flushDisconnectStatus(item);
+
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException e) {
+                    // nothing
+                }
+
+                // 開始追尾
+                switchTailClick(event);
             });
         }).start();
     }
 
+    /**
+     * 取得目前選擇的節點資料
+     *
+     * @param item
+     * @param server
+     * @param log
+     */
     void findValue(TreeItem item, OutContent<Server> server, OutContent<LogPath> log) {
         if (item == null) return;
         if (item.getValue() instanceof Server && server != null) {
@@ -460,13 +501,44 @@ public class MainController {
      * @param event
      */
     public void switchTailClick(Event event) {
+        setTailing(true);
+        new Thread(() -> {
+            while (tailing && !App.STOP_ALL_TASK) {
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException e) {
+                    // nothing
+                }
+                ObservableList items = contents.getItems();
+                //noinspection unchecked
+                ObservableList<Integer> selection = contents.getSelectionModel().getSelectedIndices();
+                int[] ints = Boxings.packInteger(selection);
+                Platform.runLater(() -> {
+                    //noinspection unchecked
+                    contents.setItems(null);
+                    //noinspection unchecked
+                    contents.setItems(items);
+                    contents.scrollTo(items.size() - 1);
+                    if (ints.length > 0) contents.getSelectionModel().selectIndices(ints[0], ints);
+                });
+            }
+        }).start();
+    }
+
+    /**
+     * 個人偏好
+     *
+     * @param event
+     */
+    public void preferenceClick(Event event) {
         // todo
     }
 
-    public void preferenceClick(Event event) {
-
-    }
-
+    /**
+     * 中斷連線
+     *
+     * @param event
+     */
     public void disconnectClick(Event event) {
         TreeItem item = (TreeItem) areas.getSelectionModel().getSelectedItem();
         OutContent<Server> server = new OutContent<>();
@@ -481,18 +553,30 @@ public class MainController {
         }
     }
 
+    /**
+     * 複製文字
+     *
+     * @param event
+     */
     public void copyText(KeyEvent event) {
         if ("c".equalsIgnoreCase(event.getCharacter()) && (event.isMetaDown() || event.isControlDown())) {
             //noinspection unchecked
             ObservableList<Line> selectedItems = contents.getSelectionModel().getSelectedItems();
-            Cube<String> logs = Cube.from(selectedItems).select((item, index) -> item.getContent());
+            if (selectedItems.size() > 0) {
+                Cube<String> logs = Cube.from(selectedItems).select((item, index) -> item.getContent());
 
-            // 複製內容
-            Clipboard systemClipboard = Clipboard.getSystemClipboard();
-            ClipboardContent content = new ClipboardContent();
-            content.putString(Delimiters.with(String.format("%n")).join(logs).toString());
+                // 複製內容
+                Clipboard systemClipboard = Clipboard.getSystemClipboard();
+                ClipboardContent content = new ClipboardContent();
+                content.putString(Delimiters.with(String.format("%n")).join(logs).toString());
 
-            systemClipboard.setContent(content);
+                systemClipboard.setContent(content);
+            }
         }
+    }
+
+    public void setTailing(boolean tailing) {
+        this.tailing = tailing;
+        tail.setDisable(!tailing);
     }
 }

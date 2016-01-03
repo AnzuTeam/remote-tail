@@ -85,6 +85,7 @@ public class App extends Application {
 
     @Override
     public void start(Stage stage) throws IOException {
+        Singleton.of(stage);
         FXMLLoader loader = Singleton.of(new FXMLLoader(
                 getClass().getResource(MainController.LAYOUT_MAIN),
                 Singleton.of(ResourceBundle.class)

@@ -339,7 +339,8 @@ public class RemoteLogReaderList extends Observable implements ObservableList<Li
     @Deprecated
     @Override
     public boolean add(Line s) {
-        throw new UnsupportedOperationException();
+        // throw new UnsupportedOperationException();
+        return true;
     }
 
     @Deprecated

@@ -23,6 +23,11 @@ public class ServerEditorController {
     @FXML
     PasswordField password;
 
+    /**
+     * 顯示資料
+     *
+     * @param server
+     */
     public void from(Server server) {
         name.setText(server.getName());
         host.setText(server.getHost());
@@ -30,6 +35,11 @@ public class ServerEditorController {
         account.setText(server.getAccount());
     }
 
+    /**
+     * 更新資料
+     *
+     * @param server
+     */
     public void update(Server server) {
         if (!Strings.isNullOrWhiteSpace(name.getText())) server.setName(name.getText().trim());
         if (!Strings.isNullOrWhiteSpace(host.getText())) server.setHost(host.getText().trim());

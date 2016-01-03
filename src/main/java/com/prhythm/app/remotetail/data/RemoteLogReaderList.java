@@ -73,15 +73,6 @@ public class RemoteLogReaderList extends Observable implements ObservableList<Li
     }
 
     @Override
-    public void addListener(ListChangeListener<? super Line> listener) {
-    }
-
-    @Override
-    public void removeListener(ListChangeListener<? super Line> listener) {
-
-    }
-
-    @Override
     public void addListener(InvalidationListener listener) {
         this.invalidationListener = listener;
     }
@@ -104,17 +95,15 @@ public class RemoteLogReaderList extends Observable implements ObservableList<Li
     @Override
     public Line get(int index) {
         if (path.hasLine(index)) {
-            // fixme cache line obj
             return new Line(index, path.atLine(index), true);
         } else {
             linesToRead.add(index);
-            // fixme cache line obj
             Line line = new Line(index, null, false);
+            // 加入觀察者，以更新內容
             addObserver(line);
             return line;
         }
     }
-
 
     @SuppressWarnings("NullableProblems")
     @Deprecated
@@ -228,10 +217,12 @@ public class RemoteLogReaderList extends Observable implements ObservableList<Li
         int min = (int) values.min();
         int max = (int) values.max();
 
-        // 取得檔案內容
+        // 連線
         synchronized (server) {
             if (!server.isConnected()) server.connect();
         }
+
+        // 取得檔案內容
         ChannelExec channel = server.openChannel("exec");
         // 指令 sed : 顯示指定行的內容
         String cmd = String.format("sed -n %d,%dp %s", min + 1, max + 1, path);
@@ -254,6 +245,7 @@ public class RemoteLogReaderList extends Observable implements ObservableList<Li
         // 通知顯示變更
         notifyObservers(path);
 
+        // 更新畫面
         if (invalidationListener != null) invalidationListener.invalidated(this);
     }
 
@@ -264,6 +256,17 @@ public class RemoteLogReaderList extends Observable implements ObservableList<Li
     }
 
     // UnsupportedOperation
+
+    @Deprecated
+    @Override
+    public void addListener(ListChangeListener<? super Line> listener) {
+    }
+
+    @Deprecated
+    @Override
+    public void removeListener(ListChangeListener<? super Line> listener) {
+
+    }
 
     @SuppressWarnings("NullableProblems")
     @Deprecated

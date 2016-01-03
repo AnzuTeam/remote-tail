@@ -44,4 +44,8 @@ public class OutContent<E> {
         return value != null;
     }
 
+    @Override
+    public String toString() {
+        return value == null ? null : value.toString();
+    }
 }

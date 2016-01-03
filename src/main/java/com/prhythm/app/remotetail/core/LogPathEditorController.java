@@ -14,10 +14,20 @@ public class LogPathEditorController {
     @FXML
     TextField path;
 
+    /**
+     * 顯示資料
+     *
+     * @param logPath
+     */
     public void from(LogPath logPath) {
         path.setText(logPath.getPath());
     }
 
+    /**
+     * 更新資料
+     *
+     * @param logPath
+     */
     public void update(LogPath logPath) {
         if (!Strings.isNullOrWhiteSpace(path.getText())) logPath.setPath(path.getText().trim());
     }

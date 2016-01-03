@@ -52,7 +52,7 @@ public class ListLineItem extends ListCell<Line> {
             setGraphic(hBox);
         }
 
-        rowId.setPrefWidth(rowId.getFont().getSize() * INDEX_COUNT);
+        rowId.setPrefWidth(rowId.getFont().getSize() * INDEX_COUNT * 0.8);
     }
 
 }

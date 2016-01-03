@@ -72,6 +72,8 @@ public class MainController {
         TreeItem<Object> root = new TreeItem<>();
         //noinspection unchecked
         areas.setRoot(root);
+
+        // 顯示節點
         if (wrapper != null) {
             ObservableList<TreeItem<Object>> rootChildren = root.getChildren();
             for (Server server : wrapper.getServers()) {
@@ -118,10 +120,11 @@ public class MainController {
 
             // disconnect
             if (newValue == null) {
+                // 空值時直接停用
                 disconnect.setDisable(true);
             } else {
-                TreeItem item = (TreeItem) newValue;
-                flushDisconnectStatus(item);
+                // 檢查 server 是否連接
+                flushDisconnectStatus((TreeItem) newValue);
             }
         });
 
@@ -129,7 +132,7 @@ public class MainController {
         //noinspection unchecked
         contents.setCellFactory(param -> new ListLineItem());
 
-        // 多選
+        // 設定 log 可多選
         contents.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
 
         // 捲動時停止 tail
@@ -154,6 +157,11 @@ public class MainController {
         });
     }
 
+    /**
+     * 更新 disconnect 狀態
+     *
+     * @param item
+     */
     void flushDisconnectStatus(TreeItem item) {
         OutContent<Server> server = new OutContent<>();
         OutContent<LogPath> log = new OutContent<>();
@@ -167,9 +175,9 @@ public class MainController {
      * @param event
      */
     void showMenu(MouseEvent event) {
-        TreeItem treeNode = (TreeItem) areas.getSelectionModel().getSelectedItem();
-        if (treeNode == null) return;
-        Object value = treeNode.getValue();
+        TreeItem selectedItem = (TreeItem) areas.getSelectionModel().getSelectedItem();
+        if (selectedItem == null) return;
+        Object value = selectedItem.getValue();
         if (value instanceof Server) {
             if (serverMenu != null) serverMenu.hide();
             if (logMenu != null) logMenu.hide();
@@ -179,7 +187,7 @@ public class MainController {
                 MenuItem menuItem;
 
                 // 新增 log
-                menuItem = new MenuItem("Add Log");
+                menuItem = new MenuItem(Singleton.of(ResourceBundle.class).getString("rmt.tree.server.context.menu.add.log"));
                 menuItem.setOnAction(this::addLogClick);
                 items.add(menuItem);
 
@@ -246,21 +254,19 @@ public class MainController {
                 menuItem.setOnAction(evt -> {
                     // 重新取值
                     TreeItem node = (TreeItem) areas.getSelectionModel().getSelectedItem();
-                    LogPath path = (LogPath) node.getValue();
+                    OutContent<Server> server = new OutContent<>();
+                    OutContent<LogPath> log = new OutContent<>();
+                    findValue(node, server, log);
 
                     Alert alert = new Alert(
                             Alert.AlertType.CONFIRMATION,
-                            String.format(Singleton.of(ResourceBundle.class).getString("rmt.dialog.delete.log"), path),
+                            String.format(Singleton.of(ResourceBundle.class).getString("rmt.dialog.delete.log"), log.value()),
                             ButtonType.YES, ButtonType.NO
                     );
                     Optional<ButtonType> result = alert.showAndWait();
                     if (result.isPresent() && result.get() == ButtonType.YES) {
-                        // 向上找出 server
-                        TreeItem parent = node.getParent();
-                        Server server = (Server) parent.getValue();
-
                         // 移除資料
-                        server.getLogPaths().remove(path);
+                        server.value().getLogPaths().remove(log.value());
                         // 移除顯示
                         node.getParent().getChildren().remove(node);
                     }
@@ -400,11 +406,7 @@ public class MainController {
             RemoteLogReaderList list = new RemoteLogReaderList(server.value(), log.value());
             list.addListener((Observable observable) -> {
                 Platform.runLater(() -> {
-                    // 藉由變更資料更新畫面
-                    //noinspection unchecked
-//                    contents.setItems(FXCollections.observableArrayList());
-                    //noinspection unchecked
-//                    contents.setItems(list);
+                    // 更新畫面
                     //noinspection Convert2MethodRef
                     contents.refresh();
                 });
@@ -422,8 +424,9 @@ public class MainController {
                 }
                 flushDisconnectStatus(item);
 
+                // 延遲2秒
                 try {
-                    Thread.sleep(1000);
+                    Thread.sleep(2000);
                 } catch (InterruptedException e) {
                     // nothing
                 }
@@ -454,6 +457,8 @@ public class MainController {
                 server.value((Server) item.getParent().getValue());
             }
         }
+
+        Logs.debug("當前資料 server=%s, logPath=%s", server, log);
     }
 
     /**
@@ -501,6 +506,7 @@ public class MainController {
      * @param event
      */
     public void switchTailClick(Event event) {
+        Logs.trace("開始追蹤檔尾");
         setTailing(true);
         new Thread(() -> {
             while (tailing && !App.STOP_ALL_TASK) {
@@ -546,7 +552,9 @@ public class MainController {
         findValue(item, server, log);
 
         if (server.present() && server.value().isConnected()) {
+            // 中斷連線
             server.value().disconnect();
+            // 清除顯示資料
             //noinspection unchecked
             contents.setItems(FXCollections.observableArrayList());
             disconnect.setDisable(true);
@@ -558,7 +566,8 @@ public class MainController {
      *
      * @param event
      */
-    public void copyText(KeyEvent event) {
+    public void hotKeyTrigger(KeyEvent event) {
+        // 複制文字
         if ("c".equalsIgnoreCase(event.getCharacter()) && (event.isMetaDown() || event.isControlDown())) {
             //noinspection unchecked
             ObservableList<Line> selectedItems = contents.getSelectionModel().getSelectedItems();
@@ -573,8 +582,19 @@ public class MainController {
                 systemClipboard.setContent(content);
             }
         }
+        // 搜尋
+        if ("f".equalsIgnoreCase(event.getCharacter()) && (event.isMetaDown() || event.isControlDown())) {
+            // todo
+            //grep -n project mylog.log | cut -d : -f1
+            //grep -n 搜尋內容 檔案 | cut -d : -f1 ＝》輸出行號
+        }
     }
 
+    /**
+     * 設定追蹤檔尾
+     *
+     * @param tailing
+     */
     public void setTailing(boolean tailing) {
         this.tailing = tailing;
         tail.setDisable(!tailing);

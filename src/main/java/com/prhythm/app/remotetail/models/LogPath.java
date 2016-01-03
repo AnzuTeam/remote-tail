@@ -73,4 +73,5 @@ public class LogPath {
     public String toString() {
         return path;
     }
+
 }

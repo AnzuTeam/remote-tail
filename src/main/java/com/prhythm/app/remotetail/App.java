@@ -85,12 +85,14 @@ public class App extends Application {
 
     @Override
     public void start(Stage stage) throws IOException {
+        // 暫存資料
         Singleton.of(stage);
         FXMLLoader loader = Singleton.of(new FXMLLoader(
                 getClass().getResource(MainController.LAYOUT_MAIN),
                 Singleton.of(ResourceBundle.class)
         ));
 
+        // 設定預設屬性
         stage.setTitle("Remote Tail - via SSH");
         stage.setScene(new Scene(loader.load(), MIN_WIDTH * 2, MIN_HEIGHT * 2));
         stage.setMinWidth(MIN_WIDTH);
@@ -132,6 +134,7 @@ public class App extends Application {
         stage.show();
     }
 
+    @Deprecated
     void alert(String title, Throwable ex) {
         ex.printStackTrace();
         Alert alert = new Alert(Alert.AlertType.ERROR);
@@ -140,11 +143,17 @@ public class App extends Application {
         alert.show();
     }
 
+    /**
+     * 初始化
+     *
+     * @param stage
+     * @throws JAXBException
+     */
     void initialize(Stage stage) throws JAXBException {
         // 讀取資料
         DataWrapper wrapper = Singleton.of(DataWrapper.read(new File(CONFIG_FILE)));
 
-
+        // 重設屬性
         if (wrapper != null) {
             stage.setX(wrapper.getWindow().getX());
             stage.setY(wrapper.getWindow().getY());

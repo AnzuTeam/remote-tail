@@ -1,11 +1,15 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <wrapper>
     <window>
-        <height>521.0</height>
-        <width>793.0</width>
-        <x>347.0</x>
-        <y>201.0</y>
+        <height>477.0</height>
+        <width>834.0</width>
+        <x>388.0</x>
+        <y>126.0</y>
     </window>
+    <preference>
+        <fontFamily>Courier New</fontFamily>
+        <fontSize>13.0</fontSize>
+    </preference>
     <servers>
         <server>
             <name>10.64.33.95 (logs)</name>

@@ -22,6 +22,9 @@ import java.util.List;
 @XmlAccessorType(XmlAccessType.FIELD)
 public class Server {
 
+    /**
+     * 顯示名稱
+     */
     String name;
 
     /**

@@ -6,9 +6,21 @@ package com.prhythm.app.remotetail.models;
  */
 public class Window {
 
+    /**
+     * 視窗位置 x
+     */
     double x;
+    /**
+     * 視窗位置 y
+     */
     double y;
+    /**
+     * 視窗寬度
+     */
     double width;
+    /**
+     * 視窗高度
+     */
     double height;
 
     public double getX() {

@@ -26,12 +26,15 @@ public class DataWrapper {
 
     Window window;
 
+    Preference preference;
+
     @XmlElementWrapper(name = "servers")
     @XmlElement(name = "server")
     List<Server> servers;
 
     public DataWrapper() {
         this.window = new Window();
+        this.preference = new Preference();
         this.servers = new ArrayList<>();
     }
 
@@ -48,6 +51,14 @@ public class DataWrapper {
 
     public void setWindow(Window window) {
         this.window = window;
+    }
+
+    public Preference getPreference() {
+        return preference;
+    }
+
+    public void setPreference(Preference preference) {
+        this.preference = preference;
     }
 
     public List<Server> getServers() {

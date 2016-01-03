@@ -1,5 +1,8 @@
 package com.prhythm.app.remotetail.data;
 
+import com.prhythm.app.remotetail.models.DataWrapper;
+import com.prhythm.app.remotetail.models.Preference;
+import com.prhythm.core.generic.data.Singleton;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.Label;
@@ -23,16 +26,18 @@ public class ListLineItem extends ListCell<Line> {
     Label text;
 
     public ListLineItem() {
+        Preference preference = Singleton.of(DataWrapper.class).getPreference();
+
         hBox = new HBox();
         hBox.getChildren().addAll(rowId = new Label(), text = new Label());
 
         rowId.setPadding(new Insets(0, 5, 0, 5));
         rowId.setBackground(new Background(new BackgroundFill(Color.LIGHTGREY, null, null)));
         rowId.setAlignment(Pos.BASELINE_RIGHT);
-        rowId.setFont(Font.font("Courier New")); // fixme 字型可設定
+        rowId.setFont(Font.font(preference.getFontFamily(), preference.getFontSize()));
 
         text.setPadding(new Insets(0, 5, 0, 5));
-        text.setFont(Font.font("Courier New"));  // fixme 字型可設定
+        text.setFont(Font.font(preference.getFontFamily(), preference.getFontSize()));
 
         setPadding(new Insets(0, 0, 0, 0));
     }

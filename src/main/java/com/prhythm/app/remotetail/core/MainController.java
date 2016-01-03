@@ -423,16 +423,6 @@ public class MainController {
                     contents.setItems(FXCollections.observableArrayList());
                 }
                 flushDisconnectStatus(item);
-
-                // 延遲2秒
-                try {
-                    Thread.sleep(2000);
-                } catch (InterruptedException e) {
-                    // nothing
-                }
-
-                // 開始追尾
-                switchTailClick(event);
             });
         }).start();
     }

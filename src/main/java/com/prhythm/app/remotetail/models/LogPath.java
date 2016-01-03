@@ -62,7 +62,6 @@ public class LogPath {
         LogPath path1 = (LogPath) o;
 
         return path.equals(path1.path);
-
     }
 
     @Override

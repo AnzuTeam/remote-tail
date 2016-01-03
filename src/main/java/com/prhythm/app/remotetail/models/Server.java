@@ -206,7 +206,6 @@ public class Server {
         if (port != server.port) return false;
         if (!host.equals(server.host)) return false;
         return account.equals(server.account);
-
     }
 
     @Override

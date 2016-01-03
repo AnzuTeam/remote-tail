@@ -1,5 +1,6 @@
 package com.prhythm.app.remotetail.core;
 
+import com.prhythm.app.remotetail.data.Line;
 import com.prhythm.app.remotetail.data.ListLineItem;
 import com.prhythm.app.remotetail.data.RemoteLogReaderList;
 import com.prhythm.app.remotetail.models.DataWrapper;
@@ -10,6 +11,7 @@ import com.prhythm.core.generic.data.Singleton;
 import com.prhythm.core.generic.exception.RecessiveException;
 import com.prhythm.core.generic.logging.Logs;
 import com.prhythm.core.generic.util.Cube;
+import com.prhythm.core.generic.util.Delimiters;
 import javafx.application.Platform;
 import javafx.beans.Observable;
 import javafx.beans.property.BooleanProperty;
@@ -22,9 +24,7 @@ import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.scene.input.KeyEvent;
-import javafx.scene.input.MouseButton;
-import javafx.scene.input.MouseEvent;
+import javafx.scene.input.*;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
@@ -112,7 +112,7 @@ public class MainController {
                 disconnect.setDisable(true);
             } else {
                 TreeItem item = (TreeItem) newValue;
-                flusDisconnectStatus(item);
+                flushDisconnectStatus(item);
             }
         });
 
@@ -129,7 +129,7 @@ public class MainController {
         contents.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
     }
 
-    void flusDisconnectStatus(TreeItem item) {
+    void flushDisconnectStatus(TreeItem item) {
         OutContent<Server> server = new OutContent<>();
         OutContent<LogPath> log = new OutContent<>();
         findValue(item, server, log);
@@ -395,7 +395,7 @@ public class MainController {
                     //noinspection unchecked
                     contents.setItems(FXCollections.observableArrayList());
                 }
-                flusDisconnectStatus(item);
+                flushDisconnectStatus(item);
             });
         }).start();
     }
@@ -478,6 +478,21 @@ public class MainController {
             //noinspection unchecked
             contents.setItems(FXCollections.observableArrayList());
             disconnect.setDisable(true);
+        }
+    }
+
+    public void copyText(KeyEvent event) {
+        if ("c".equalsIgnoreCase(event.getCharacter()) && (event.isMetaDown() || event.isControlDown())) {
+            //noinspection unchecked
+            ObservableList<Line> selectedItems = contents.getSelectionModel().getSelectedItems();
+            Cube<String> logs = Cube.from(selectedItems).select((item, index) -> item.getContent());
+
+            // 複製內容
+            Clipboard systemClipboard = Clipboard.getSystemClipboard();
+            ClipboardContent content = new ClipboardContent();
+            content.putString(Delimiters.with(String.format("%n")).join(logs).toString());
+
+            systemClipboard.setContent(content);
         }
     }
 }

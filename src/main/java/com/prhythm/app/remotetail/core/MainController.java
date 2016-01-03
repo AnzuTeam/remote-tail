@@ -515,8 +515,8 @@ public class MainController {
      */
     @FXML
     void switchTailClick(Event event) {
-        // 執行中時停用
-        if (tailing) {
+        // 執行中或查詢時時停用
+        if (tailing || contents.getItems() instanceof FilteredLogReaderList) {
             setTailing(false);
             return;
         }
@@ -614,8 +614,9 @@ public class MainController {
      *
      * @param tailing
      */
-    @FXML
     void setTailing(boolean tailing) {
+        if (contents.getItems() instanceof FilteredLogReaderList) tailing = false;
+
         this.tailing = tailing;
         tail.setDisable(!tailing);
     }

@@ -504,11 +504,7 @@ public class MainController {
         findValue(item, server, log);
 
         if (server.present()) {
-            if (log.present()) {
-                createEditDialog(server.value(), log.value());
-            } else {
-                createEditDialog(server.value());
-            }
+            createEditDialog(server.value(), new LogPath());
         }
     }
 
@@ -519,6 +515,12 @@ public class MainController {
      */
     @FXML
     void switchTailClick(Event event) {
+        // 執行中時停用
+        if (tailing) {
+            setTailing(false);
+            return;
+        }
+
         Logs.trace("開始追蹤檔尾");
         setTailing(true);
         new Thread(() -> {
@@ -647,6 +649,9 @@ public class MainController {
         if (searchText.getText().trim().isEmpty()) {
             return;
         }
+
+        // 搜尋時停用追尾
+        setTailing(false);
 
         new Thread(() -> {
             TreeItem item = (TreeItem) areas.getSelectionModel().getSelectedItem();

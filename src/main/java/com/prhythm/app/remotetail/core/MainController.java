@@ -9,6 +9,7 @@ import com.prhythm.core.generic.data.Singleton;
 import com.prhythm.core.generic.exception.RecessiveException;
 import com.prhythm.core.generic.logging.Logs;
 import com.prhythm.core.generic.util.Cube;
+import javafx.application.Platform;
 import javafx.beans.Observable;
 import javafx.beans.property.BooleanProperty;
 import javafx.collections.FXCollections;
@@ -98,6 +99,7 @@ public class MainController {
             }
         });
 
+        // 啟用／停用 log 新增功能
         //noinspection unchecked
         areas.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> addLog.setDisable(newValue == null));
 
@@ -332,19 +334,26 @@ public class MainController {
 
             RemoteLogReaderList list = new RemoteLogReaderList(server, path);
             list.addListener((Observable observable) -> {
-                // 自動重繪
-                contents.refresh();
+                Platform.runLater(() -> {
+                    // 藉由變更資料更新畫面
+                    //noinspection unchecked
+                    contents.setItems(FXCollections.observableArrayList());
+                    //noinspection unchecked
+                    contents.setItems(list);
+                });
             });
-            try {
-                //noinspection unchecked
-                contents.setItems(list);
-                // 連接時移至底部
-                contents.scrollTo(list.size() - 1);
-            } catch (Exception e) {
-                Logs.error(RecessiveException.unwrapp(e));
-                //noinspection unchecked
-                contents.setItems(FXCollections.observableArrayList());
-            }
+            Platform.runLater(() -> {
+                try {
+                    //noinspection unchecked
+                    contents.setItems(list);
+                    // 連接時移至底部
+                    contents.scrollTo(list.size() - 1);
+                } catch (Exception e) {
+                    Logs.error(RecessiveException.unwrapp(e));
+                    //noinspection unchecked
+                    contents.setItems(FXCollections.observableArrayList());
+                }
+            });
         }).start();
     }
 

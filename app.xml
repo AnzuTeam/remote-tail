@@ -29,7 +29,7 @@
             <port>22</port>
             <account>eservice</account>
             <password>eservice</password>
-            <expanded>true</expanded>
+            <expanded>false</expanded>
             <logs>
                 <logPath>
                     <path>qqqq</path>
@@ -43,15 +43,23 @@
                 <logPath>
                     <path>222</path>
                 </logPath>
+                <logPath>
+                    <path>eerer</path>
+                </logPath>
             </logs>
         </server>
         <server>
-            <name>dd</name>
-            <host>dd</host>
-            <port>0</port>
-            <account>dfdaf</account>
-            <expanded>false</expanded>
-            <logs/>
+            <name>giiiiiiiiiiiiiiiiit</name>
+            <host>192.168.56.102</host>
+            <port>22</port>
+            <account>nanashi07</account>
+            <password>coriander</password>
+            <expanded>true</expanded>
+            <logs>
+                <logPath>
+                    <path>/home/nanashi07/mylog.log</path>
+                </logPath>
+            </logs>
         </server>
     </servers>
 </wrapper>

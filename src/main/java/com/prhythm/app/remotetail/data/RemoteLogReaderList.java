@@ -10,6 +10,7 @@ import com.prhythm.core.generic.exception.RecessiveException;
 import com.prhythm.core.generic.logging.Logs;
 import com.prhythm.core.generic.util.Cube;
 import com.prhythm.core.generic.util.Streams;
+import javafx.application.Platform;
 import javafx.beans.InvalidationListener;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
@@ -48,8 +49,20 @@ public class RemoteLogReaderList extends Observable implements ObservableList<Li
             exec.connect();
             Scanner scanner = new Scanner(in);
             int size = scanner.nextInt();
+            Logs.trace("%s 行數: %d", path, size);
             in.close();
             exec.disconnect();
+
+            //
+            if (invalidationListener != null) {
+                Platform.runLater(new Runnable() {
+                    @Override
+                    public void run() {
+                        invalidationListener.invalidated(RemoteLogReaderList.this);
+                    }
+                });
+            }
+
             return size;
         }
     };
@@ -111,6 +124,65 @@ public class RemoteLogReaderList extends Observable implements ObservableList<Li
             addObserver(line);
             return line;
         }
+    }
+
+
+    @SuppressWarnings("NullableProblems")
+    @Deprecated
+    @Override
+    public ListIterator<Line> listIterator() {
+        return new ListIterator<Line>() {
+
+            int index;
+
+            @Override
+            public boolean hasNext() {
+                return index + 1 < size();
+            }
+
+            @Override
+            public Line next() {
+                return get(index++);
+            }
+
+            @Override
+            public boolean hasPrevious() {
+                return index - 1 > -1;
+            }
+
+            @Override
+            public Line previous() {
+                return get(index--);
+            }
+
+            @Override
+            public int nextIndex() {
+                return index + 1;
+            }
+
+            @Override
+            public int previousIndex() {
+                return index - 1;
+            }
+
+            @Deprecated
+            @Override
+            public void remove() {
+                throw new UnsupportedOperationException();
+            }
+
+            @Deprecated
+            @Override
+            public void set(Line line) {
+                throw new UnsupportedOperationException();
+            }
+
+            @Deprecated
+            @Override
+            public void add(Line line) {
+                throw new UnsupportedOperationException();
+            }
+        };
     }
 
     @Override
@@ -222,13 +294,6 @@ public class RemoteLogReaderList extends Observable implements ObservableList<Li
     @Deprecated
     @Override
     public <T> T[] toArray(T[] a) {
-        throw new UnsupportedOperationException();
-    }
-
-    @SuppressWarnings("NullableProblems")
-    @Deprecated
-    @Override
-    public ListIterator<Line> listIterator() {
         throw new UnsupportedOperationException();
     }
 

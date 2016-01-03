@@ -1,6 +1,7 @@
 package com.prhythm.app.remotetail.data;
 
 import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListCell;
 import javafx.scene.layout.Background;
@@ -15,7 +16,7 @@ import javafx.scene.text.Font;
  */
 public class ListLineItem extends ListCell<Line> {
 
-    static double ROW_ID_WIDTH = 0;
+    static double INDEX_COUNT = 0;
 
     HBox hBox;
     Label rowId;
@@ -27,6 +28,7 @@ public class ListLineItem extends ListCell<Line> {
 
         rowId.setPadding(new Insets(0, 5, 0, 5));
         rowId.setBackground(new Background(new BackgroundFill(Color.LIGHTGREY, null, null)));
+        rowId.setAlignment(Pos.BASELINE_RIGHT);
         rowId.setFont(Font.font("Courier New")); // fixme 字型可設定
 
         text.setPadding(new Insets(0, 5, 0, 5));
@@ -43,13 +45,14 @@ public class ListLineItem extends ListCell<Line> {
             text.setText(null);
             setGraphic(null);
         } else {
+            INDEX_COUNT = Math.max(INDEX_COUNT, String.valueOf(item.getIndex()).length());
+
             rowId.setText(String.valueOf(item.getIndex()));
             text.setText(item.toString());
             setGraphic(hBox);
         }
 
-        ROW_ID_WIDTH = Math.max(rowId.getPrefWidth(), ROW_ID_WIDTH);
-        rowId.setPrefWidth(ROW_ID_WIDTH);
+        rowId.setPrefWidth(rowId.getFont().getSize() * INDEX_COUNT);
     }
 
 }

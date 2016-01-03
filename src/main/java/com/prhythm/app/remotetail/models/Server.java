@@ -31,7 +31,7 @@ public class Server {
     /**
      * 通訊埠
      */
-    int port;
+    int port = 22;
 
     /**
      * 帳號

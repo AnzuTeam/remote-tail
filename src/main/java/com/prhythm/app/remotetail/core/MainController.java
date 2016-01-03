@@ -1,6 +1,7 @@
 package com.prhythm.app.remotetail.core;
 
 import com.prhythm.app.remotetail.App;
+import com.prhythm.app.remotetail.data.FilteredLogReaderList;
 import com.prhythm.app.remotetail.data.Line;
 import com.prhythm.app.remotetail.data.ListLineItem;
 import com.prhythm.app.remotetail.data.RemoteLogReaderList;
@@ -19,6 +20,7 @@ import javafx.beans.Observable;
 import javafx.beans.property.BooleanProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.event.ActionEvent;
 import javafx.event.Event;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
@@ -61,12 +63,21 @@ public class MainController {
     BorderPane disconnect;
     @FXML
     Label tail;
+    @FXML
+    HBox searchBar;
+    @FXML
+    TextField searchText;
 
     ContextMenu serverMenu;
     ContextMenu logMenu;
 
     boolean tailing = true;
 
+    /**
+     * 初始化
+     *
+     * @param wrapper
+     */
     public void load(DataWrapper wrapper) {
         // 載入設定
         TreeItem<Object> root = new TreeItem<>();
@@ -574,9 +585,10 @@ public class MainController {
         }
         // 搜尋
         if ("f".equalsIgnoreCase(event.getCharacter()) && (event.isMetaDown() || event.isControlDown())) {
-            // todo
-            //grep -n project mylog.log | cut -d : -f1
-            //grep -n 搜尋內容 檔案 | cut -d : -f1 ＝》輸出行號
+            searchText.setText("");
+            searchBar.setManaged(true);
+            searchBar.setVisible(true);
+            Platform.runLater(searchText::requestFocus);
         }
     }
 
@@ -588,5 +600,64 @@ public class MainController {
     public void setTailing(boolean tailing) {
         this.tailing = tailing;
         tail.setDisable(!tailing);
+    }
+
+    /**
+     * 隱藏 search bar
+     *
+     * @param event
+     */
+    public void exitTrigger(KeyEvent event) {
+        if (event.getCode() == KeyCode.ESCAPE) {
+            searchText.setText("");
+            searchBar.setManaged(false);
+            searchBar.setVisible(false);
+
+            // 顯示完整內容
+            connectLogFile(null);
+        } else if (event.getCode() == KeyCode.ENTER) {
+            searchClick(null);
+        }
+    }
+
+    /**
+     * 執行搜尋
+     *
+     * @param actionEvent
+     */
+    public void searchClick(ActionEvent actionEvent) {
+        if (searchText.getText().trim().isEmpty()) {
+            return;
+        }
+
+        new Thread(() -> {
+            TreeItem item = (TreeItem) areas.getSelectionModel().getSelectedItem();
+            OutContent<Server> server = new OutContent<>();
+            OutContent<LogPath> log = new OutContent<>();
+            findValue(item, server, log);
+            if (!log.present()) return;
+
+            FilteredLogReaderList list = new FilteredLogReaderList(server.value(), log.value(), searchText.getText().trim());
+            list.addListener((Observable observable) -> {
+                Platform.runLater(() -> {
+                    // 更新畫面
+                    //noinspection Convert2MethodRef
+                    contents.refresh();
+                });
+            });
+            Platform.runLater(() -> {
+                try {
+                    //noinspection unchecked
+                    contents.setItems(list);
+                    // 連接時移至底部
+                    contents.scrollTo(list.size() - 1);
+                } catch (Exception e) {
+                    Logs.error(RecessiveException.unwrapp(e));
+                    //noinspection unchecked
+                    contents.setItems(FXCollections.observableArrayList());
+                }
+                flushDisconnectStatus(item);
+            });
+        }).start();
     }
 }

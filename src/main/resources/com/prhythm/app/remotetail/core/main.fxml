@@ -6,14 +6,28 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.*?>
 <BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity"
-            xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1"
-            fx:controller="com.prhythm.app.remotetail.core.MainController"
-            onKeyTyped="#hotKeyTrigger">
+            onKeyTyped="#hotKeyTrigger" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.prhythm.app.remotetail.core.MainController">
     <center>
         <SplitPane dividerPositions="0.25" BorderPane.alignment="CENTER">
             <items>
                 <TreeView fx:id="areas" showRoot="false" SplitPane.resizableWithParent="false"/>
-                <ListView fx:id="contents"/>
+                <BorderPane>
+                    <center>
+                        <ListView fx:id="contents" BorderPane.alignment="CENTER"/>
+                    </center>
+                    <top>
+                        <HBox fx:id="searchBar" BorderPane.alignment="CENTER" managed="false" visible="false">
+                            <children>
+                                <TextField HBox.hgrow="ALWAYS" fx:id="searchText" onKeyPressed="#exitTrigger"/>
+                                <Button mnemonicParsing="false" text="%rmt.search.button" onAction="#searchClick"/>
+                            </children>
+                        </HBox>
+                    </top>
+                    <bottom>
+                        <TextArea BorderPane.alignment="CENTER" managed="false" visible="false"/>
+                    </bottom>
+                </BorderPane>
             </items>
         </SplitPane>
     </center>
@@ -47,7 +61,7 @@
                         <Insets bottom="5.0" left="5.0" right="5.0" top="5.0"/>
                     </HBox.margin>
                 </BorderPane>
-                <BorderPane fx:id="addLog" onMouseClicked="#addLogClick" disable="true">
+                <BorderPane fx:id="addLog" disable="true" onMouseClicked="#addLogClick">
                     <center>
                         <ImageView BorderPane.alignment="CENTER">
                             <image>
@@ -66,7 +80,7 @@
                         <Insets bottom="5.0" left="5.0" right="5.0" top="5.0"/>
                     </HBox.margin>
                 </BorderPane>
-                <BorderPane fx:id="disconnect" onMouseClicked="#disconnectClick" disable="true">
+                <BorderPane fx:id="disconnect" disable="true" onMouseClicked="#disconnectClick">
                     <center>
                         <ImageView BorderPane.alignment="CENTER">
                             <image>
@@ -114,7 +128,7 @@
                         </ImageView>
                     </center>
                     <bottom>
-                        <Label fx:id="tail" text="%rmt.menu.tail.enable" BorderPane.alignment="CENTER" disable="true">
+                        <Label fx:id="tail" disable="true" text="%rmt.menu.tail.enable" BorderPane.alignment="CENTER">
                             <font>
                                 <Font name="System Bold" size="9.0"/>
                             </font>

@@ -1,14 +1,15 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <wrapper>
     <window>
-        <height>477.0</height>
-        <width>834.0</width>
-        <x>388.0</x>
-        <y>126.0</y>
+        <height>873.0</height>
+        <width>1440.0</width>
+        <x>0.0</x>
+        <y>23.0</y>
     </window>
     <preference>
         <fontFamily>Courier New</fontFamily>
         <fontSize>13.0</fontSize>
+        <logLevel>Info</logLevel>
     </preference>
     <servers>
         <server>

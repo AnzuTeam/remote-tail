@@ -5,7 +5,7 @@ import com.jcraft.jsch.JSchException;
 import com.prhythm.app.remotetail.App;
 import com.prhythm.app.remotetail.models.LogPath;
 import com.prhythm.app.remotetail.models.Server;
-import com.prhythm.core.generic.data.Expirable;
+import com.prhythm.core.generic.data.Once;
 import com.prhythm.core.generic.exception.RecessiveException;
 import com.prhythm.core.generic.logging.Logs;
 import com.prhythm.core.generic.util.Cube;
@@ -20,39 +20,37 @@ import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 /**
- * Log 內容
- * Created by nanashi07 on 15/12/30.
+ * 搜尋清單
+ * Created by nanashi07 on 16/1/3.
  */
-public class RemoteLogReaderList extends Observable implements ObservableList<Line>, Runnable {
+public class FilteredLogReaderList extends Observable implements ObservableList<Line>, Runnable {
 
     final long INTERVAL = TimeUnit.SECONDS.toMillis(2);
 
+    String pattern;
     transient final Server server;
     transient final LogPath path;
 
-    /**
-     * 檔案行數
-     */
-    transient Expirable<Integer> lineCount = new Expirable<Integer>(INTERVAL) {
+    final Once<List<Integer>> linesMatched = new Once<List<Integer>>() {
         @Override
-        protected Integer get() throws Exception {
+        protected List<Integer> get() throws Exception {
             synchronized (server) {
                 if (!server.isConnected()) server.connect();
             }
             ChannelExec exec = server.openChannel("exec");
             // 指令 wc : 計算檔案行數
-            String cmd = String.format("wc -l %s", path);
-            Logs.trace("計算行數(%s)", cmd);
+            String cmd = String.format("grep -n %s %s | cut -d : -f1", pattern, path);
+            Logs.trace("取得符合行行號(%s)", cmd);
             exec.setCommand(cmd);
             InputStream in = exec.getInputStream();
             exec.connect();
-            Scanner scanner = new Scanner(in);
-            int size = scanner.nextInt();
-            Logs.trace("%s 行數: %d", path, size);
-            in.close();
+
+            List<Integer> result = new ArrayList<>();
+            result.addAll(Cube.from(Streams.toLines(in, "utf-8")).notNull().select((item, index) -> Integer.parseInt(item.trim())).toList());
+
             exec.disconnect();
 
-            return size;
+            return result;
         }
     };
 
@@ -64,9 +62,10 @@ public class RemoteLogReaderList extends Observable implements ObservableList<Li
 
     transient InvalidationListener invalidationListener;
 
-    public RemoteLogReaderList(Server server, LogPath logPath) {
+    public FilteredLogReaderList(Server server, LogPath logPath, String pattern) {
         this.server = server;
         this.path = logPath;
+        this.pattern = pattern;
 
         // 起始讀取作業
         new Thread(this).start();
@@ -84,7 +83,7 @@ public class RemoteLogReaderList extends Observable implements ObservableList<Li
 
     @Override
     public int size() {
-        return lineCount.value();
+        return linesMatched.value().size();
     }
 
     @Override
@@ -94,6 +93,11 @@ public class RemoteLogReaderList extends Observable implements ObservableList<Li
 
     @Override
     public Line get(int index) {
+        if (linesMatched.value().size() == 0) return null;
+
+        // 取得實際資料行號
+        index = linesMatched.value().get(index);
+
         if (path.hasLine(index)) {
             return new Line(index, path.atLine(index), true);
         } else {

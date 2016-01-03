@@ -10,7 +10,6 @@ import com.prhythm.core.generic.exception.RecessiveException;
 import com.prhythm.core.generic.logging.Logs;
 import com.prhythm.core.generic.util.Cube;
 import com.prhythm.core.generic.util.Streams;
-import javafx.application.Platform;
 import javafx.beans.InvalidationListener;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
@@ -52,16 +51,6 @@ public class RemoteLogReaderList extends Observable implements ObservableList<Li
             Logs.trace("%s 行數: %d", path, size);
             in.close();
             exec.disconnect();
-
-            //
-            if (invalidationListener != null) {
-                Platform.runLater(new Runnable() {
-                    @Override
-                    public void run() {
-                        invalidationListener.invalidated(RemoteLogReaderList.this);
-                    }
-                });
-            }
 
             return size;
         }

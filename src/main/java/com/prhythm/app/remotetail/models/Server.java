@@ -6,6 +6,7 @@ import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.Session;
 import com.prhythm.core.generic.exception.RecessiveException;
 import com.prhythm.core.generic.logging.Logs;
+import com.prhythm.core.generic.util.Cube;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
@@ -102,6 +103,12 @@ public class Server {
     public void disconnect() {
         if (session != null && session.isConnected()) {
             session.disconnect();
+
+            // clear temp log
+            Cube.from(logPaths).each((item, index) -> {
+                item.lines.clear();
+                return true;
+            });
 
             Logs.info("Disconnect %n", this);
         }

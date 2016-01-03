@@ -65,7 +65,7 @@
                         <Insets bottom="5.0" left="5.0" right="5.0" top="5.0"/>
                     </HBox.margin>
                 </BorderPane>
-                <BorderPane disable="true">
+                <BorderPane fx:id="disconnect" onMouseClicked="#disconnectClick" disable="true">
                     <center>
                         <ImageView BorderPane.alignment="CENTER">
                             <image>
@@ -84,7 +84,7 @@
                         <Insets bottom="5.0" left="5.0" right="5.0" top="5.0"/>
                     </HBox.margin>
                 </BorderPane>
-                <BorderPane>
+                <BorderPane onMouseClicked="#preferenceClick">
                     <center>
                         <ImageView BorderPane.alignment="CENTER">
                             <image>

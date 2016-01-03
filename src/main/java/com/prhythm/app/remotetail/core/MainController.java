@@ -5,6 +5,7 @@ import com.prhythm.app.remotetail.data.RemoteLogReaderList;
 import com.prhythm.app.remotetail.models.DataWrapper;
 import com.prhythm.app.remotetail.models.LogPath;
 import com.prhythm.app.remotetail.models.Server;
+import com.prhythm.core.generic.data.OutContent;
 import com.prhythm.core.generic.data.Singleton;
 import com.prhythm.core.generic.exception.RecessiveException;
 import com.prhythm.core.generic.logging.Logs;
@@ -46,11 +47,13 @@ public class MainController {
     final public static String ICON_LOG = "/com/prhythm/app/remotetail/icons/icon_log.png";
 
     @FXML
-    public ListView contents;
+    ListView contents;
     @FXML
-    public TreeView areas;
+    TreeView areas;
     @FXML
-    public BorderPane addLog;
+    BorderPane addLog;
+    @FXML
+    BorderPane disconnect;
 
     ContextMenu serverMenu;
     ContextMenu logMenu;
@@ -74,8 +77,8 @@ public class MainController {
                     TreeItem item = (TreeItem) property.getBean();
                     Object value = item.getValue();
                     if (value == null || !(value instanceof Server)) return;
-                    Server server1 = (Server) value;
-                    server1.setExpanded(newValue);
+                    Server serverValue = (Server) value;
+                    serverValue.setExpanded(newValue);
                 });
 
                 final ObservableList<TreeItem<Object>> serverChildren = treeItem.getChildren();
@@ -99,9 +102,19 @@ public class MainController {
             }
         });
 
-        // 啟用／停用 log 新增功能
         //noinspection unchecked
-        areas.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> addLog.setDisable(newValue == null));
+        areas.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
+            // 啟用／停用 log 新增功能
+            addLog.setDisable(newValue == null);
+
+            // disconnect
+            if (newValue == null) {
+                disconnect.setDisable(true);
+            } else {
+                TreeItem item = (TreeItem) newValue;
+                flusDisconnectStatus(item);
+            }
+        });
 
         // 變更檔案呈現（包含行號與文字）
         //noinspection unchecked
@@ -116,6 +129,18 @@ public class MainController {
         contents.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
     }
 
+    void flusDisconnectStatus(TreeItem item) {
+        OutContent<Server> server = new OutContent<>();
+        OutContent<LogPath> log = new OutContent<>();
+        findValue(item, server, log);
+        disconnect.setDisable(!(server.present() && server.value().isConnected()));
+    }
+
+    /**
+     * 顯示 node 的右鍵選單
+     *
+     * @param event
+     */
     void showMenu(MouseEvent event) {
         TreeItem treeNode = (TreeItem) areas.getSelectionModel().getSelectedItem();
         if (treeNode == null) return;
@@ -149,7 +174,9 @@ public class MainController {
                 menuItem.setOnAction(evt -> {
                     // 重新取值
                     TreeItem node = (TreeItem) areas.getSelectionModel().getSelectedItem();
-                    Server server = (Server) node.getValue();
+                    OutContent<Server> server = new OutContent<>();
+                    OutContent<LogPath> log = new OutContent<>();
+                    findValue(node, server, log);
 
                     Alert alert = new Alert(
                             Alert.AlertType.CONFIRMATION,
@@ -159,7 +186,7 @@ public class MainController {
                     Optional<ButtonType> result = alert.showAndWait();
                     if (result.isPresent() && result.get() == ButtonType.YES) {
                         // 移除資料
-                        Singleton.of(DataWrapper.class).getServers().remove(server);
+                        Singleton.of(DataWrapper.class).getServers().remove(server.value());
                         // 移除顯示
                         node.getParent().getChildren().remove(node);
                     }
@@ -181,13 +208,11 @@ public class MainController {
                 menuItem.setOnAction(evt -> {
                     // 重新取值
                     TreeItem node = (TreeItem) areas.getSelectionModel().getSelectedItem();
-                    LogPath path = (LogPath) node.getValue();
+                    OutContent<Server> server = new OutContent<>();
+                    OutContent<LogPath> log = new OutContent<>();
+                    findValue(node, server, log);
 
-                    // 向上找出 server
-                    TreeItem parent = node.getParent();
-                    Server server = (Server) parent.getValue();
-
-                    createEditDialog(server, path);
+                    createEditDialog(server.value(), log.value());
                 });
                 items.add(menuItem);
 
@@ -222,6 +247,12 @@ public class MainController {
         }
     }
 
+    /**
+     * 顯示 {@link Server} 編輯視窗
+     *
+     * @param server
+     * @return
+     */
     Dialog<Server> createEditDialog(Server server) {
         Dialog<Server> dialog = new Dialog<>();
         dialog.setTitle(Singleton.of(ResourceBundle.class).getString("rmt.dialog.server.edit.title.update"));
@@ -267,6 +298,13 @@ public class MainController {
         return dialog;
     }
 
+    /**
+     * 顯示 {@link LogPath} 編輯視窗
+     *
+     * @param server
+     * @param path
+     * @return
+     */
     Dialog<LogPath> createEditDialog(Server server, LogPath path) {
         Dialog<LogPath> dialog = new Dialog<>();
         dialog.setTitle(Singleton.of(ResourceBundle.class).getString("rmt.dialog.log.edit.title.update"));
@@ -321,25 +359,29 @@ public class MainController {
         return dialog;
     }
 
+    /**
+     * 顯示檔案內容
+     *
+     * @param event
+     */
     void connectLogFile(MouseEvent event) {
         new Thread(() -> {
             TreeItem item = (TreeItem) areas.getSelectionModel().getSelectedItem();
-            if (item == null) return;
-            Object value = item.getValue();
-            if (value == null || !(value instanceof LogPath)) return;
-            LogPath path = (LogPath) value;
+            OutContent<Server> server = new OutContent<>();
+            OutContent<LogPath> log = new OutContent<>();
+            findValue(item, server, log);
+            if (!log.present()) return;
 
-            TreeItem parent = item.getParent();
-            Server server = (Server) parent.getValue();
-
-            RemoteLogReaderList list = new RemoteLogReaderList(server, path);
+            RemoteLogReaderList list = new RemoteLogReaderList(server.value(), log.value());
             list.addListener((Observable observable) -> {
                 Platform.runLater(() -> {
                     // 藉由變更資料更新畫面
                     //noinspection unchecked
-                    contents.setItems(FXCollections.observableArrayList());
+//                    contents.setItems(FXCollections.observableArrayList());
                     //noinspection unchecked
-                    contents.setItems(list);
+//                    contents.setItems(list);
+                    //noinspection Convert2MethodRef
+                    contents.refresh();
                 });
             });
             Platform.runLater(() -> {
@@ -353,31 +395,89 @@ public class MainController {
                     //noinspection unchecked
                     contents.setItems(FXCollections.observableArrayList());
                 }
+                flusDisconnectStatus(item);
             });
         }).start();
     }
 
+    void findValue(TreeItem item, OutContent<Server> server, OutContent<LogPath> log) {
+        if (item == null) return;
+        if (item.getValue() instanceof Server && server != null) {
+            server.value((Server) item.getValue());
+        }
+        if (item.getValue() instanceof LogPath && log != null) {
+            log.value((LogPath) item.getValue());
+
+            // server
+            if (item.getParent().getValue() instanceof Server && server != null) {
+                server.value((Server) item.getParent().getValue());
+            }
+        }
+    }
+
+    /**
+     * 取得 icon
+     *
+     * @param path
+     * @return
+     */
     Node getIcon(String path) {
         return new ImageView(new Image(getClass().getResourceAsStream(path)));
     }
 
+    /**
+     * 新增 Server node
+     *
+     * @param event
+     */
     public void addServerClick(Event event) {
         createEditDialog(new Server());
     }
 
+    /**
+     * 新增 Log node
+     *
+     * @param event
+     */
     public void addLogClick(Event event) {
         TreeItem item = (TreeItem) areas.getSelectionModel().getSelectedItem();
-        Object value = item.getValue();
-        if (value instanceof Server) {
-            Server server = (Server) value;
-            createEditDialog(server, new LogPath());
-        } else if (value instanceof LogPath) {
-            Server server = (Server) item.getParent().getValue();
-            createEditDialog(server, new LogPath());
+        OutContent<Server> server = new OutContent<>();
+        OutContent<LogPath> log = new OutContent<>();
+        findValue(item, server, log);
+
+        if (server.present()) {
+            if (log.present()) {
+                createEditDialog(server.value(), log.value());
+            } else {
+                createEditDialog(server.value());
+            }
         }
     }
 
+    /**
+     * 切換 tail
+     *
+     * @param event
+     */
     public void switchTailClick(Event event) {
+        // todo
+    }
 
+    public void preferenceClick(Event event) {
+
+    }
+
+    public void disconnectClick(Event event) {
+        TreeItem item = (TreeItem) areas.getSelectionModel().getSelectedItem();
+        OutContent<Server> server = new OutContent<>();
+        OutContent<LogPath> log = new OutContent<>();
+        findValue(item, server, log);
+
+        if (server.present() && server.value().isConnected()) {
+            server.value().disconnect();
+            //noinspection unchecked
+            contents.setItems(FXCollections.observableArrayList());
+            disconnect.setDisable(true);
+        }
     }
 }

@@ -16,6 +16,7 @@ import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
+import javafx.scene.image.Image;
 import javafx.stage.Stage;
 
 import javax.xml.bind.JAXBException;
@@ -34,6 +35,7 @@ public class App extends Application {
      */
     public static boolean STOP_ALL_TASK = false;
 
+    final static String APP_ICON = "/com/prhythm/app/remotetail/icons/app_icon.png";
     final static String CONFIG_FILE = "app.xml";
     final double MIN_WIDTH = 400;
     final double MIN_HEIGHT = 300;
@@ -93,8 +95,11 @@ public class App extends Application {
         ));
 
         // 設定預設屬性
+        Scene scene = new Scene(loader.load(), MIN_WIDTH * 2, MIN_HEIGHT * 2);
+        // style
+        scene.getStylesheets().add("/com/prhythm/app/remotetail/core/main.css");
         stage.setTitle("Remote Tail - via SSH");
-        stage.setScene(new Scene(loader.load(), MIN_WIDTH * 2, MIN_HEIGHT * 2));
+        stage.setScene(scene);
         stage.setMinWidth(MIN_WIDTH);
         stage.setMinHeight(MIN_HEIGHT);
 
@@ -152,6 +157,9 @@ public class App extends Application {
     void initialize(Stage stage) throws JAXBException {
         // 讀取資料
         DataWrapper wrapper = Singleton.of(DataWrapper.read(new File(CONFIG_FILE)));
+
+        // app icon
+        stage.getIcons().add(new Image(APP_ICON));
 
         // 重設屬性
         if (wrapper != null) {

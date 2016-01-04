@@ -651,6 +651,10 @@ public class MainController {
             searchBar.setVisible(true);
             Platform.runLater(searchText::requestFocus);
         }
+        // 到指定行
+        if ("g".equalsIgnoreCase(event.getCharacter()) && (event.isMetaDown() || event.isControlDown())) {
+            // todo
+        }
     }
 
     /**
@@ -727,5 +731,10 @@ public class MainController {
                 flushDisconnectStatus(item);
             });
         }).start();
+    }
+
+    @FXML
+    void highLightClick(Event event) {
+        // todo
     }
 }

@@ -2,6 +2,7 @@ package com.prhythm.app.remotetail.core;
 
 import com.prhythm.app.remotetail.models.Server;
 import com.prhythm.core.generic.util.Strings;
+import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
@@ -82,4 +83,10 @@ public class ServerEditorController {
         return result;
     }
 
+    public void focus() {
+        Platform.runLater(() -> {
+            name.requestFocus();
+            name.deselect();
+        });
+    }
 }

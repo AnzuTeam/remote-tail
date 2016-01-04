@@ -227,7 +227,12 @@ public class MainController {
                             String.format(Singleton.of(ResourceBundle.class).getString("rmt.dialog.delete.server"), server),
                             ButtonType.YES, ButtonType.NO
                     );
+
+                    // 更新外觀
+                    App.changeTheme(alert.getDialogPane().getStylesheets(), Singleton.of(DataWrapper.class).getPreference().getTheme());
+
                     Optional<ButtonType> result = alert.showAndWait();
+
                     if (result.isPresent() && result.get() == ButtonType.YES) {
                         // 移除資料
                         Singleton.of(DataWrapper.class).getServers().remove(server.value());
@@ -274,7 +279,12 @@ public class MainController {
                             String.format(Singleton.of(ResourceBundle.class).getString("rmt.dialog.delete.log"), log.value()),
                             ButtonType.YES, ButtonType.NO
                     );
+
+                    // 更新外觀
+                    App.changeTheme(alert.getDialogPane().getStylesheets(), Singleton.of(DataWrapper.class).getPreference().getTheme());
+
                     Optional<ButtonType> result = alert.showAndWait();
+
                     if (result.isPresent() && result.get() == ButtonType.YES) {
                         // 移除資料
                         server.value().getLogPaths().remove(log.value());
@@ -327,7 +337,9 @@ public class MainController {
             return null;
         });
 
+        controller.focus();
         Optional<Server> result = dialog.showAndWait();
+
         if (result.isPresent() && !Cube.from(Singleton.of(DataWrapper.class).getServers()).has(result.get())) {
             Singleton.of(DataWrapper.class).getServers().add(server);
 
@@ -382,7 +394,9 @@ public class MainController {
             return null;
         });
 
+        controller.focus();
         Optional<LogPath> result = dialog.showAndWait();
+
         if (result.isPresent() && !server.getLogPaths().contains(path)) {
             server.getLogPaths().add(path);
 
@@ -612,6 +626,7 @@ public class MainController {
             return null;
         });
 
+        controller.focus();
         dialog.show();
     }
 
@@ -661,6 +676,17 @@ public class MainController {
         }
         // 搜尋
         if ("f".equalsIgnoreCase(event.getCharacter()) && (event.isMetaDown() || event.isControlDown())) {
+            // 檢查顯示狀態
+            {
+                TreeItem item = (TreeItem) areas.getSelectionModel().getSelectedItem();
+                if (item == null) return;
+                OutContent<Server> server = new OutContent<>();
+                OutContent<LogPath> log = new OutContent<>();
+                findValue(item, server, log);
+                if (!server.present() || !log.present()) return;
+                if (!server.value().isConnected()) return;
+            }
+
             searchText.setText("");
             searchBar.setManaged(true);
             searchBar.setVisible(true);
@@ -676,6 +702,18 @@ public class MainController {
      * 跳至指定行
      */
     void jumpToLine() {
+        // 檢查顯示狀態
+        {
+            TreeItem item = (TreeItem) areas.getSelectionModel().getSelectedItem();
+            if (item == null) return;
+            OutContent<Server> server = new OutContent<>();
+            OutContent<LogPath> log = new OutContent<>();
+            findValue(item, server, log);
+            if (!server.present() || !log.present()) return;
+            if (!server.value().isConnected()) return;
+        }
+
+        // 開啟行號輸入
         Dialog<Object> dialog = new Dialog<>();
         dialog.setTitle(Singleton.of(ResourceBundle.class).getString("rmt.dialog.go.to.title"));
 
@@ -719,8 +757,8 @@ public class MainController {
             return null;
         });
 
-        dialog.show();
         controller.focus();
+        dialog.show();
     }
 
     /**

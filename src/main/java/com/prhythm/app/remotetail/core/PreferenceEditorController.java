@@ -5,6 +5,7 @@ import com.prhythm.app.remotetail.data.ListLineItem;
 import com.prhythm.app.remotetail.models.Preference;
 import com.prhythm.core.generic.data.Singleton;
 import com.prhythm.core.generic.util.Strings;
+import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.scene.Scene;
@@ -81,4 +82,10 @@ public class PreferenceEditorController {
         return result;
     }
 
+    public void focus() {
+        Platform.runLater(() -> {
+            fontFamily.requestFocus();
+            fontFamily.deselect();
+        });
+    }
 }

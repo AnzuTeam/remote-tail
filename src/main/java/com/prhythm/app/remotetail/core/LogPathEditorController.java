@@ -2,6 +2,7 @@ package com.prhythm.app.remotetail.core;
 
 import com.prhythm.app.remotetail.models.LogPath;
 import com.prhythm.core.generic.util.Strings;
+import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.control.TextField;
 
@@ -40,4 +41,10 @@ public class LogPathEditorController {
         return result;
     }
 
+    public void focus() {
+        Platform.runLater(() -> {
+            path.requestFocus();
+            path.deselect();
+        });
+    }
 }

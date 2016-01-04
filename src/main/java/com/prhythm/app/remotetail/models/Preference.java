@@ -10,6 +10,10 @@ import javax.xml.bind.annotation.XmlAccessorType;
 @XmlAccessorType(XmlAccessType.FIELD)
 public class Preference {
 
+    public enum Theme {
+        White, Dark
+    }
+
     /**
      * 字型
      */
@@ -22,11 +26,16 @@ public class Preference {
      * 編碼
      */
     String charset;
+    /**
+     * 外觀顏色
+     */
+    Theme theme;
 
     public Preference() {
         this.fontFamily = "Courier New";
         this.fontSize = 13;
         this.charset = "utf-8";
+        this.theme = Theme.White;
     }
 
     public double getFontSize() {
@@ -51,5 +60,13 @@ public class Preference {
 
     public void setCharset(String charset) {
         this.charset = charset;
+    }
+
+    public Theme getTheme() {
+        return theme;
+    }
+
+    public void setTheme(Theme theme) {
+        this.theme = theme;
     }
 }

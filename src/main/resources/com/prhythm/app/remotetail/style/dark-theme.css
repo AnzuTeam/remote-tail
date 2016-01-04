@@ -3,7 +3,3 @@
     -fx-background: rgb(50, 50, 50);
     -fx-control-inner-background: rgb(50, 50, 50);
 }
-
-.split-pane > .split-pane-divider {
-    -fx-padding: 0 0 0 0;
-}

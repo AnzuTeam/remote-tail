@@ -4,6 +4,7 @@ import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.Logger;
 import com.prhythm.app.remotetail.core.MainController;
 import com.prhythm.app.remotetail.models.DataWrapper;
+import com.prhythm.app.remotetail.models.Preference;
 import com.prhythm.app.remotetail.models.Server;
 import com.prhythm.core.generic.data.Singleton;
 import com.prhythm.core.generic.exception.RecessiveException;
@@ -36,9 +37,12 @@ public class App extends Application {
     public static boolean STOP_ALL_TASK = false;
 
     final static String APP_ICON = "/com/prhythm/app/remotetail/icons/app_icon.png";
+    final static String STYLE_DARK_APP = "/com/prhythm/app/remotetail/style/dark-theme.css";
+    final static String STYLE_SPLIT_PANE_DIVIDER = "/com/prhythm/app/remotetail/style/divider.css";
+
     final static String CONFIG_FILE = "app.xml";
-    final double MIN_WIDTH = 400;
-    final double MIN_HEIGHT = 300;
+    final static double MIN_WIDTH = 400;
+    final static double MIN_HEIGHT = 300;
 
     public static void main(String[] args) {
         // 不處理 host key
@@ -95,9 +99,9 @@ public class App extends Application {
         ));
 
         // 設定預設屬性
-        Scene scene = new Scene(loader.load(), MIN_WIDTH * 2, MIN_HEIGHT * 2);
-        // style
-        scene.getStylesheets().add("/com/prhythm/app/remotetail/core/main.css");
+        Scene scene = Singleton.of(new Scene(loader.load(), MIN_WIDTH * 2, MIN_HEIGHT * 2));
+        // divider style
+        scene.getStylesheets().add(STYLE_SPLIT_PANE_DIVIDER);
         stage.setTitle("Remote Tail - via SSH");
         stage.setScene(scene);
         stage.setMinWidth(MIN_WIDTH);
@@ -163,6 +167,9 @@ public class App extends Application {
 
         // 重設屬性
         if (wrapper != null) {
+            if (wrapper.getPreference().getTheme() == Preference.Theme.Dark)
+                Singleton.of(Scene.class).getStylesheets().add(STYLE_DARK_APP);
+
             stage.setX(wrapper.getWindow().getX());
             stage.setY(wrapper.getWindow().getY());
 

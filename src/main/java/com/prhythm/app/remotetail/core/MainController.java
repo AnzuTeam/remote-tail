@@ -1,10 +1,7 @@
 package com.prhythm.app.remotetail.core;
 
 import com.prhythm.app.remotetail.App;
-import com.prhythm.app.remotetail.data.FilteredLogReaderList;
-import com.prhythm.app.remotetail.data.Line;
-import com.prhythm.app.remotetail.data.ListLineItem;
-import com.prhythm.app.remotetail.data.RemoteLogReaderList;
+import com.prhythm.app.remotetail.data.*;
 import com.prhythm.app.remotetail.models.DataWrapper;
 import com.prhythm.app.remotetail.models.LogPath;
 import com.prhythm.app.remotetail.models.Server;
@@ -411,6 +408,22 @@ public class MainController {
         searchText.setText("");
         searchBar.setManaged(false);
         searchBar.setVisible(false);
+
+        if (contents.getItems() instanceof RemoteLogReaderList) {
+            /** 若不是同一個檔案時，先清空畫面 **/
+            // 取得現在檔案
+            TreeItem item = (TreeItem) areas.getSelectionModel().getSelectedItem();
+            OutContent<Server> server = new OutContent<>();
+            OutContent<LogPath> log = new OutContent<>();
+            findValue(item, server, log);
+
+            // 清除畫面
+            RemoteSourceReaderList list = (RemoteSourceReaderList) contents.getItems();
+            if (!list.getServer().equals(server.value()) || list.getPath().equals(log.value())) {
+                //noinspection unchecked
+                contents.setItems(null);
+            }
+        }
 
         new Thread(() -> {
             TreeItem item = (TreeItem) areas.getSelectionModel().getSelectedItem();

@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <wrapper>
     <window>
-        <height>589.0</height>
-        <width>973.0</width>
-        <x>378.0</x>
-        <y>125.0</y>
+        <height>873.0</height>
+        <width>1440.0</width>
+        <x>0.0</x>
+        <y>23.0</y>
     </window>
     <preference>
         <fontFamily>Courier New</fontFamily>
@@ -24,32 +24,7 @@
                     <path>/wls/eservice/ESFRONT/logs/FRServer1_console.log</path>
                 </logPath>
                 <logPath>
-                    <path>2222</path>
-                </logPath>
-            </logs>
-        </server>
-        <server>
-            <name>aaabbcccdd</name>
-            <host>10.64.33.295</host>
-            <port>22</port>
-            <account>eservice</account>
-            <password>eservice</password>
-            <expanded>false</expanded>
-            <logs>
-                <logPath>
-                    <path>qqqq</path>
-                </logPath>
-                <logPath>
-                    <path>wwwww</path>
-                </logPath>
-                <logPath>
-                    <path>111</path>
-                </logPath>
-                <logPath>
-                    <path>222</path>
-                </logPath>
-                <logPath>
-                    <path>eerer</path>
+                    <path>/wls/eservice/wls1036_domain/logs/admin_console.log</path>
                 </logPath>
             </logs>
         </server>

@@ -4,6 +4,7 @@ import com.prhythm.app.remotetail.App;
 import com.prhythm.app.remotetail.data.*;
 import com.prhythm.app.remotetail.models.DataWrapper;
 import com.prhythm.app.remotetail.models.LogPath;
+import com.prhythm.app.remotetail.models.Preference;
 import com.prhythm.app.remotetail.models.Server;
 import com.prhythm.core.generic.data.OutContent;
 import com.prhythm.core.generic.data.Singleton;
@@ -46,6 +47,7 @@ public class MainController {
     final public static String LAYOUT_MAIN = "/com/prhythm/app/remotetail/core/main.fxml";
     final public static String LAYOUT_SERVER_EDITOR = "/com/prhythm/app/remotetail/core/edit.server.fxml";
     final public static String LAYOUT_LOG_EDITOR = "/com/prhythm/app/remotetail/core/edit.log.fxml";
+    final public static String LAYOUT_PREFERENCE_EDITOR = "/com/prhythm/app/remotetail/core/edit.preference.fxml";
 
     final public static String ICON_SERVER = "/com/prhythm/app/remotetail/icons/icon_server.png";
     final public static String ICON_LOG = "/com/prhythm/app/remotetail/icons/icon_log.png";
@@ -294,7 +296,7 @@ public class MainController {
      */
     Dialog<Server> createEditDialog(Server server) {
         Dialog<Server> dialog = new Dialog<>();
-        dialog.setTitle(Singleton.of(ResourceBundle.class).getString("rmt.dialog.server.edit.title.update"));
+        dialog.setTitle(Singleton.of(ResourceBundle.class).getString("rmt.dialog.server.edit.title"));
 
         ServerEditorController controller;
         VBox content;
@@ -346,7 +348,7 @@ public class MainController {
      */
     Dialog<LogPath> createEditDialog(Server server, LogPath path) {
         Dialog<LogPath> dialog = new Dialog<>();
-        dialog.setTitle(Singleton.of(ResourceBundle.class).getString("rmt.dialog.log.edit.title.update"));
+        dialog.setTitle(Singleton.of(ResourceBundle.class).getString("rmt.dialog.log.edit.title"));
 
         LogPathEditorController controller;
         HBox content;
@@ -566,7 +568,36 @@ public class MainController {
      */
     @FXML
     void preferenceClick(Event event) {
-        // todo
+        Dialog<Preference> dialog = new Dialog<>();
+        dialog.setTitle(Singleton.of(ResourceBundle.class).getString("rmt.dialog.preference.edit.title"));
+        Preference preference = Singleton.of(DataWrapper.class).getPreference();
+
+        PreferenceEditorController controller;
+        VBox content;
+
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource(LAYOUT_PREFERENCE_EDITOR), Singleton.of(ResourceBundle.class));
+            content = loader.load();
+            controller = loader.getController();
+        } catch (IOException e) {
+            throw new RecessiveException(e.getMessage(), e);
+        }
+
+        dialog.getDialogPane().setContent(content);
+        controller.from(preference);
+
+        dialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
+
+        dialog.setResultConverter(param -> {
+            if (param == ButtonType.OK && controller.update(preference)) {
+                Logs.debug("Server 設定 %s 已更新", preference);
+                return preference;
+            }
+            // todo 狀態錯誤
+            return null;
+        });
+
+        dialog.show();
     }
 
     /**

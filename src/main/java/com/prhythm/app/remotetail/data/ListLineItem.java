@@ -19,25 +19,21 @@ import javafx.scene.text.Font;
  */
 public class ListLineItem extends ListCell<Line> {
 
-    static double MAX_INDEX_WIDTH = 0;
+    public static double MAX_INDEX_WIDTH = 0;
 
     HBox hBox;
     Label rowId;
     Label text;
 
     public ListLineItem() {
-        Preference preference = Singleton.of(DataWrapper.class).getPreference();
-
         hBox = new HBox();
         hBox.getChildren().addAll(rowId = new Label(), text = new Label());
 
         rowId.setPadding(new Insets(0, 5, 0, 5));
         rowId.setBackground(new Background(new BackgroundFill(Color.LIGHTGREY, null, null)));
         rowId.setAlignment(Pos.BASELINE_RIGHT);
-        rowId.setFont(Font.font(preference.getFontFamily(), preference.getFontSize()));
 
         text.setPadding(new Insets(0, 5, 0, 5));
-        text.setFont(Font.font(preference.getFontFamily(), preference.getFontSize()));
 
         setPadding(new Insets(0, 0, 0, 0));
     }
@@ -50,13 +46,16 @@ public class ListLineItem extends ListCell<Line> {
             text.setText(null);
             setGraphic(null);
         } else {
+            Preference preference = Singleton.of(DataWrapper.class).getPreference();
             String num = String.valueOf(item.getIndex());
             MAX_INDEX_WIDTH = Math.max(MAX_INDEX_WIDTH, num.length() * (rowId.getFont().getSize() * 0.8));
 
             rowId.setText(num);
+            rowId.setFont(Font.font(preference.getFontFamily(), preference.getFontSize()));
             rowId.setPrefWidth(MAX_INDEX_WIDTH);
 
             text.setText(item.toString());
+            text.setFont(Font.font(preference.getFontFamily(), preference.getFontSize()));
 
             setGraphic(hBox);
         }

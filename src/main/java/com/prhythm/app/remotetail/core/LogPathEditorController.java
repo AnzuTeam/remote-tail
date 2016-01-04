@@ -31,11 +31,8 @@ public class LogPathEditorController {
     public boolean update(LogPath logPath) {
         boolean result = true;
 
-        path.getStyleClass().clear();
-
         if (Strings.isNullOrWhiteSpace(path.getText())) {
             result = false;
-            path.getStyleClass().add("red");
         } else {
             logPath.setPath(path.getText().trim());
         }

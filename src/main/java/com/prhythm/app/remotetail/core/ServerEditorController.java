@@ -51,35 +51,30 @@ public class ServerEditorController {
 
         if (Strings.isNullOrWhiteSpace(name.getText())) {
             result = false;
-            name.getStyleClass().add("red");
         } else {
             server.setName(name.getText().trim());
         }
 
         if (Strings.isNullOrWhiteSpace(host.getText())) {
             result = false;
-            name.getStyleClass().add("red");
         } else {
             server.setHost(host.getText().trim());
         }
 
         if (Strings.isNullOrWhiteSpace(port.getText()) || !port.getText().trim().replaceAll("\\d", "").isEmpty()) {
             result = false;
-            name.getStyleClass().add("red");
         } else {
             server.setPort(Integer.parseInt(port.getText().trim()));
         }
 
         if (Strings.isNullOrWhiteSpace(account.getText())) {
             result = false;
-            name.getStyleClass().add("red");
         } else {
             server.setAccount(account.getText().trim());
         }
 
         if (Strings.isNullOrWhiteSpace(password.getText())) {
             result = false;
-            name.getStyleClass().add("red");
         } else {
             server.setPassword(password.getText().trim());
         }

@@ -7,10 +7,7 @@ import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListCell;
-import javafx.scene.layout.Background;
-import javafx.scene.layout.BackgroundFill;
 import javafx.scene.layout.HBox;
-import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 
 /**
@@ -29,8 +26,8 @@ public class ListLineItem extends ListCell<Line> {
         hBox = new HBox();
         hBox.getChildren().addAll(rowId = new Label(), text = new Label());
 
+        rowId.getStyleClass().add("dark-line-number");
         rowId.setPadding(new Insets(0, 5, 0, 5));
-        rowId.setBackground(new Background(new BackgroundFill(Color.LIGHTGREY, null, null)));
         rowId.setAlignment(Pos.BASELINE_RIGHT);
 
         text.setPadding(new Insets(0, 5, 0, 5));

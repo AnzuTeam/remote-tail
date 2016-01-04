@@ -48,6 +48,7 @@ public class MainController {
     final public static String LAYOUT_SERVER_EDITOR = "/com/prhythm/app/remotetail/core/edit.server.fxml";
     final public static String LAYOUT_LOG_EDITOR = "/com/prhythm/app/remotetail/core/edit.log.fxml";
     final public static String LAYOUT_PREFERENCE_EDITOR = "/com/prhythm/app/remotetail/core/edit.preference.fxml";
+    final public static String LAYOUT_GO_TO_EDITOR = "/com/prhythm/app/remotetail/core/edit.goto.fxml";
 
     final public static String ICON_SERVER = "/com/prhythm/app/remotetail/icons/icon_server.png";
     final public static String ICON_LOG = "/com/prhythm/app/remotetail/icons/icon_log.png";
@@ -158,7 +159,7 @@ public class MainController {
                         .ofType(ScrollBar.class)
                         .each((item, index) -> {
                             item.valueProperty().addListener((value, oldValue, newValue) -> {
-                                // fixme 有時會影響按下 tail 功能
+                                // todo 檢查scroll是否到底，到底不設false
                                 setTailing(false);
                             });
                             return true;
@@ -419,9 +420,12 @@ public class MainController {
             OutContent<LogPath> log = new OutContent<>();
             findValue(item, server, log);
 
-            // 清除畫面
             RemoteSourceReaderList list = (RemoteSourceReaderList) contents.getItems();
-            if (!list.getServer().equals(server.value()) || list.getPath().equals(log.value())) {
+            if (list.getServer().equals(server.value()) || list.getPath().equals(log.value())) {
+                // 同一檔不再讀取
+                return;
+            } else {
+                // 不同檔時清除畫面
                 //noinspection unchecked
                 contents.setItems(null);
             }
@@ -653,8 +657,54 @@ public class MainController {
         }
         // 到指定行
         if ("g".equalsIgnoreCase(event.getCharacter()) && (event.isMetaDown() || event.isControlDown())) {
-            // todo
+            jumpToLine();
         }
+    }
+
+    void jumpToLine() {
+        Dialog<Object> dialog = new Dialog<>();
+        dialog.setTitle(Singleton.of(ResourceBundle.class).getString("rmt.dialog.go.to.title"));
+
+        GotoLineEditorController controller;
+        HBox content;
+
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource(LAYOUT_GO_TO_EDITOR), Singleton.of(ResourceBundle.class));
+            content = loader.load();
+            controller = loader.getController();
+        } catch (IOException e) {
+            throw new RecessiveException(e.getMessage(), e);
+        }
+
+        dialog.getDialogPane().setContent(content);
+        dialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
+
+        dialog.setResultConverter(param -> {
+            if (param == ButtonType.OK && controller.selectedLineNumber() != null) {
+                Platform.runLater(() -> {
+                    // 取得目前顯示檔案
+                    TreeItem item = (TreeItem) areas.getSelectionModel().getSelectedItem();
+                    OutContent<Server> server = new OutContent<>();
+                    OutContent<LogPath> log = new OutContent<>();
+                    findValue(item, server, log);
+                    if (!server.present() || !log.present()) return;
+                    if (!server.value().isConnected()) return;
+
+                    Integer index = controller.selectedLineNumber();
+                    String line = log.value().atLine(index);
+
+                    //fixme 錯誤
+                    //noinspection unchecked
+                    contents.scrollTo(new Line(index, line, log.value().hasLine(index)));
+                    Logs.debug("跳至第 %s 行", index);
+                });
+                return null;
+            }
+            return null;
+        });
+
+        dialog.show();
+        controller.focus();
     }
 
     /**
@@ -695,9 +745,8 @@ public class MainController {
      */
     @FXML
     void searchClick(ActionEvent actionEvent) {
-        if (searchText.getText().trim().isEmpty()) {
+        if (searchText.getText().trim().isEmpty())
             return;
-        }
 
         // 搜尋時停用追尾
         setTailing(false);
@@ -737,4 +786,5 @@ public class MainController {
     void highLightClick(Event event) {
         // todo
     }
+
 }

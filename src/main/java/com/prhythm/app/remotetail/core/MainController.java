@@ -310,6 +310,9 @@ public class MainController {
             throw new RecessiveException(e.getMessage(), e);
         }
 
+        // 更新外觀
+        App.changeTheme(dialog.getDialogPane().getStylesheets(), Singleton.of(DataWrapper.class).getPreference().getTheme());
+
         dialog.getDialogPane().setContent(content);
         controller.from(server);
 
@@ -361,6 +364,9 @@ public class MainController {
         } catch (IOException e) {
             throw new RecessiveException(e.getMessage(), e);
         }
+
+        // 更新外觀
+        App.changeTheme(dialog.getDialogPane().getStylesheets(), Singleton.of(DataWrapper.class).getPreference().getTheme());
 
         dialog.getDialogPane().setContent(content);
         controller.from(path);
@@ -589,6 +595,9 @@ public class MainController {
             throw new RecessiveException(e.getMessage(), e);
         }
 
+        // 更新外觀
+        App.changeTheme(dialog.getDialogPane().getStylesheets(), Singleton.of(DataWrapper.class).getPreference().getTheme());
+
         dialog.getDialogPane().setContent(content);
         controller.from(preference);
 
@@ -663,6 +672,9 @@ public class MainController {
         }
     }
 
+    /**
+     * 跳至指定行
+     */
     void jumpToLine() {
         Dialog<Object> dialog = new Dialog<>();
         dialog.setTitle(Singleton.of(ResourceBundle.class).getString("rmt.dialog.go.to.title"));
@@ -677,6 +689,9 @@ public class MainController {
         } catch (IOException e) {
             throw new RecessiveException(e.getMessage(), e);
         }
+
+        // 更新外觀
+        App.changeTheme(dialog.getDialogPane().getStylesheets(), Singleton.of(DataWrapper.class).getPreference().getTheme());
 
         dialog.getDialogPane().setContent(content);
         dialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);

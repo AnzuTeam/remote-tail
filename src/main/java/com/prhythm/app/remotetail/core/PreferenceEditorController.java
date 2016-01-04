@@ -72,16 +72,11 @@ public class PreferenceEditorController {
             preference.setCharset(charset.getText().trim());
         }
 
+        // 更新外觀顏免資料
         preference.setTheme((Preference.Theme) theme.getSelectionModel().getSelectedItem());
 
-        switch (preference.getTheme()) {
-            case White:
-                Singleton.of(Scene.class).getStylesheets().remove(App.STYLE_DARK_APP);
-                break;
-            case Dark:
-                Singleton.of(Scene.class).getStylesheets().add(App.STYLE_DARK_APP);
-                break;
-        }
+        // 更新外觀
+        App.changeTheme(Singleton.of(Scene.class).getStylesheets(), preference.getTheme());
 
         return result;
     }

@@ -14,6 +14,7 @@ import com.prhythm.core.generic.logging.LogFactory;
 import com.prhythm.core.generic.logging.Logs;
 import com.prhythm.core.generic.util.Strings;
 import javafx.application.Application;
+import javafx.collections.ObservableList;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
@@ -44,6 +45,17 @@ public class App extends Application {
     final static String CONFIG_FILE = "app.xml";
     final static double MIN_WIDTH = 400;
     final static double MIN_HEIGHT = 300;
+
+    public static void changeTheme(ObservableList<String> styleSheets, Preference.Theme theme) {
+        switch (theme) {
+            case White:
+                styleSheets.remove(App.STYLE_DARK_APP);
+                break;
+            case Dark:
+                styleSheets.add(App.STYLE_DARK_APP);
+                break;
+        }
+    }
 
     public static void main(String[] args) {
         // 不處理 host key

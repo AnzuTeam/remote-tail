@@ -78,4 +78,10 @@ public class FilteredLogReaderList extends RemoteSourceReaderList {
         }
     }
 
+    @Override
+    public int indexOf(Object o) {
+        Line line = (Line) o;
+        return linesMatched.value().indexOf(line.getIndex());
+    }
+
 }

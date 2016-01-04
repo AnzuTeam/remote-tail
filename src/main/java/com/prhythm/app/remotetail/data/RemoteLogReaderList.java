@@ -70,4 +70,10 @@ public class RemoteLogReaderList extends RemoteSourceReaderList {
         }
     }
 
+    @Override
+    public int indexOf(Object o) {
+        Line line = (Line) o;
+        return line.getIndex() - 1;
+    }
+
 }

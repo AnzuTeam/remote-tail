@@ -116,12 +116,6 @@ public abstract class RemoteSourceReaderList extends Observable implements Obser
     }
 
     @Override
-    public int indexOf(Object o) {
-        // 未知作用
-        return 0;
-    }
-
-    @Override
     public void run() {
         while (!App.STOP_ALL_TASK && !stopReadTask) {
             if (!linesToRead.isEmpty()) {

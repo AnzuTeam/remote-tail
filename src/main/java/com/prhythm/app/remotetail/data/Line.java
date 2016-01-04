@@ -41,6 +41,21 @@ public class Line implements Observer {
     }
 
     @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Line line = (Line) o;
+
+        return index == line.index;
+    }
+
+    @Override
+    public int hashCode() {
+        return index;
+    }
+
+    @Override
     public String toString() {
         return content == null ? "loading..." : content;
     }

@@ -36,9 +36,10 @@ public class App extends Application {
      */
     public static boolean STOP_ALL_TASK = false;
 
-    final static String APP_ICON = "/com/prhythm/app/remotetail/icons/app_icon.png";
-    final static String STYLE_DARK_APP = "/com/prhythm/app/remotetail/style/dark-theme.css";
-    final static String STYLE_SPLIT_PANE_DIVIDER = "/com/prhythm/app/remotetail/style/divider.css";
+    final public static String APP_ICON = "/com/prhythm/app/remotetail/icons/app_icon.png";
+
+    final public static String STYLE_DARK_APP = "/com/prhythm/app/remotetail/style/dark-theme.css";
+    final public static String STYLE_SPLIT_PANE_DIVIDER = "/com/prhythm/app/remotetail/style/divider.css";
 
     final static String CONFIG_FILE = "app.xml";
     final static double MIN_WIDTH = 400;

@@ -1,9 +1,14 @@
 package com.prhythm.app.remotetail.core;
 
+import com.prhythm.app.remotetail.App;
 import com.prhythm.app.remotetail.data.ListLineItem;
 import com.prhythm.app.remotetail.models.Preference;
+import com.prhythm.core.generic.data.Singleton;
 import com.prhythm.core.generic.util.Strings;
+import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
+import javafx.scene.Scene;
+import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.TextField;
 
 /**
@@ -18,6 +23,8 @@ public class PreferenceEditorController {
     TextField fontSize;
     @FXML
     TextField charset;
+    @FXML
+    ChoiceBox theme;
 
     /**
      * 顯示資料
@@ -28,6 +35,10 @@ public class PreferenceEditorController {
         fontFamily.setText(preference.getFontFamily());
         fontSize.setText(String.valueOf(preference.getFontSize()));
         charset.setText(preference.getCharset());
+        //noinspection unchecked
+        theme.setItems(FXCollections.observableArrayList(Preference.Theme.values()));
+        //noinspection unchecked
+        theme.getSelectionModel().select(preference.getTheme());
     }
 
     /**
@@ -59,6 +70,17 @@ public class PreferenceEditorController {
             result = false;
         } else {
             preference.setCharset(charset.getText().trim());
+        }
+
+        preference.setTheme((Preference.Theme) theme.getSelectionModel().getSelectedItem());
+
+        switch (preference.getTheme()) {
+            case White:
+                Singleton.of(Scene.class).getStylesheets().remove(App.STYLE_DARK_APP);
+                break;
+            case Dark:
+                Singleton.of(Scene.class).getStylesheets().add(App.STYLE_DARK_APP);
+                break;
         }
 
         return result;

@@ -159,8 +159,8 @@ public class MainController {
                         .ofType(ScrollBar.class)
                         .each((item, index) -> {
                             item.valueProperty().addListener((value, oldValue, newValue) -> {
-                                // todo 檢查scroll是否到底，到底不設false
-                                setTailing(false);
+                                // 捲至底部時不停止追尾
+                                if (newValue.doubleValue() < 1) setTailing(false);
                             });
                             return true;
                         });
@@ -461,6 +461,8 @@ public class MainController {
                     //noinspection unchecked
                     contents.setItems(FXCollections.observableArrayList());
                 }
+
+                // 更新中斷連線按鈕
                 flushDisconnectStatus(item);
             });
         }).start();
@@ -693,7 +695,6 @@ public class MainController {
                     Integer index = controller.selectedLineNumber();
                     String line = log.value().atLine(index);
 
-                    //fixme 錯誤
                     //noinspection unchecked
                     contents.scrollTo(new Line(index, line, log.value().hasLine(index)));
                     Logs.debug("跳至第 %s 行", index);

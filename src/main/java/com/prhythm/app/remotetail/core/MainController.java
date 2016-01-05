@@ -170,6 +170,15 @@ public class MainController {
     }
 
     /**
+     * 取得目前的搜尋文字
+     *
+     * @return
+     */
+    public String getSearchText() {
+        return searchBar.isVisible() ? searchText.getText().trim() : null;
+    }
+
+    /**
      * 更新 disconnect 狀態
      *
      * @param item

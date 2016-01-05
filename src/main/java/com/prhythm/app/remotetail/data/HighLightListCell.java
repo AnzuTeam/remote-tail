@@ -43,6 +43,7 @@ public class HighLightListCell extends ListCell<HighLight> {
 
     @Override
     protected void updateItem(HighLight item, boolean empty) {
+        super.updateItem(item, empty);  // 重要，不能刪
         if (empty) {
             setGraphic(null);
         } else {
@@ -52,13 +53,13 @@ public class HighLightListCell extends ListCell<HighLight> {
                     preference.getFontFamily(),
                     item.isBold() ? FontWeight.BOLD : FontWeight.NORMAL,
                     item.isItalic() ? FontPosture.ITALIC : FontPosture.REGULAR,
-                    preference.getFontSize()
+                    render.getFont().getSize()
             ));
             // 文字顏色／背景色
             render.setStyle(String.format(
                     "-fx-background-color: #%s; -fx-text-fill: #%s;",
-                    item.getForeground().toString().substring(2),
-                    item.getBackground().toString().substring(2)
+                    item.getBackground().toString().substring(2),
+                    item.getForeground().toString().substring(2)
             ));
             // pattern
             pattern.setText(item.getPattern());

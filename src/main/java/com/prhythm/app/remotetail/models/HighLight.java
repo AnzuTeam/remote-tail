@@ -37,6 +37,10 @@ public class HighLight {
      * 斜體
      */
     boolean italic;
+    /**
+     * 排序
+     */
+    int order;
 
     public HighLight() {
     }
@@ -96,6 +100,14 @@ public class HighLight {
 
     public void setItalic(boolean italic) {
         this.italic = italic;
+    }
+
+    public int getOrder() {
+        return order;
+    }
+
+    public void setOrder(int order) {
+        this.order = order;
     }
 
     @Override

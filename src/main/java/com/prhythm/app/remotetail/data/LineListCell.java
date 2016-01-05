@@ -45,7 +45,7 @@ public class LineListCell extends ListCell<Line> {
 
     @Override
     protected void updateItem(Line item, boolean empty) {
-        super.updateItem(item, empty);
+        super.updateItem(item, empty);  // 重要，不能刪
         if (empty) {
             rowId.setText(null);
             text.setText(null);

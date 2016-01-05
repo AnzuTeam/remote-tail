@@ -7,7 +7,8 @@
       xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1"
       fx:controller="com.prhythm.app.remotetail.core.HighLightEditorController">
     <children>
-        <CheckBox fx:id="searchPattern" prefHeight="27.0" text="High light search pattern"/>
+        <CheckBox fx:id="searchPattern" prefHeight="27.0" text="High light search pattern"
+                  onAction="#searchPatternAction"/>
         <ListView fx:id="rules" prefHeight="200.0">
             <VBox.margin>
                 <Insets top="10.0"/>
@@ -61,13 +62,13 @@
                 <VBox>
                     <children>
                         <Label text="Foreground Color"/>
-                        <ColorPicker fx:id="foreground"/>
+                        <ColorPicker fx:id="foreground" onAction="#foregroundAction"/>
                     </children>
                 </VBox>
                 <VBox GridPane.columnIndex="1">
                     <children>
                         <Label text="Background Color"/>
-                        <ColorPicker fx:id="background"/>
+                        <ColorPicker fx:id="background" onAction="#backgroundAction"/>
                     </children>
                 </VBox>
             </children>
@@ -95,9 +96,11 @@
                 <RowConstraints vgrow="SOMETIMES"/>
             </rowConstraints>
             <children>
-                <CheckBox fx:id="ignoreCase" mnemonicParsing="false" text="Ignore Case"/>
-                <CheckBox fx:id="bold" mnemonicParsing="false" text="Bold" GridPane.columnIndex="1"/>
-                <CheckBox fx:id="italic" mnemonicParsing="false" text="Italic" GridPane.columnIndex="2"/>
+                <CheckBox fx:id="ignoreCase" mnemonicParsing="false" text="Ignore Case" onAction="#ignoreCaseAction"/>
+                <CheckBox fx:id="bold" mnemonicParsing="false" text="Bold" GridPane.columnIndex="1"
+                          onAction="#boldAction"/>
+                <CheckBox fx:id="italic" mnemonicParsing="false" text="Italic" GridPane.columnIndex="2"
+                          onAction="#italicAction"/>
             </children>
             <VBox.margin>
                 <Insets top="5.0"/>

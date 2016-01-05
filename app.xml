@@ -12,9 +12,7 @@
         <charset>utf-8</charset>
         <theme>Dark</theme>
     </preference>
-    <highLights>
-        <markSearchPattern>true</markSearchPattern>
-    </highLights>
+
     <servers>
         <server>
             <name>10.64.33.95 (logs)</name>

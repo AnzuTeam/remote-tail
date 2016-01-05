@@ -17,6 +17,13 @@ import java.util.List;
 @XmlAccessorType(XmlAccessType.FIELD)
 public class DataWrapper {
 
+    /**
+     * 取檔案讀取設定
+     *
+     * @param file 設定檔 app.xml
+     * @return
+     * @throws JAXBException
+     */
     public static DataWrapper read(File file) throws JAXBException {
         if (file == null || !file.exists()) return new DataWrapper();
         JAXBContext context = JAXBContext.newInstance(DataWrapper.class);
@@ -24,10 +31,24 @@ public class DataWrapper {
         return (DataWrapper) unmarshaller.unmarshal(file);
     }
 
+    /**
+     * 視窗屬性
+     */
     Window window;
 
+    /**
+     * 偏好選項
+     */
     Preference preference;
 
+    /**
+     * 顯著標示
+     */
+    HighLights highLights;
+
+    /**
+     * 記錄的 {@link Server}
+     */
     @XmlElementWrapper(name = "servers")
     @XmlElement(name = "server")
     List<Server> servers;
@@ -35,6 +56,7 @@ public class DataWrapper {
     public DataWrapper() {
         this.window = new Window();
         this.preference = new Preference();
+        this.highLights = new HighLights();
         this.servers = new ArrayList<>();
     }
 
@@ -59,6 +81,14 @@ public class DataWrapper {
 
     public void setPreference(Preference preference) {
         this.preference = preference;
+    }
+
+    public HighLights getHighLights() {
+        return highLights;
+    }
+
+    public void setHighLights(HighLights highLights) {
+        this.highLights = highLights;
     }
 
     public List<Server> getServers() {

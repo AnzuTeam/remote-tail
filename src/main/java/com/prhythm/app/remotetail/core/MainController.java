@@ -441,7 +441,7 @@ public class MainController {
             findValue(item, server, log);
 
             RemoteSourceReaderList list = (RemoteSourceReaderList) contents.getItems();
-            if (list.getServer().equals(server.value()) || list.getPath().equals(log.value())) {
+            if (list.getServer().equals(server.value()) && list.getPath().equals(log.value())) {
                 // 同一檔不再讀取
                 return;
             } else {

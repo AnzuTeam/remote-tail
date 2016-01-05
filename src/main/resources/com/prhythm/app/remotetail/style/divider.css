@@ -1,16 +1,12 @@
-.split-pane > .split-pane-divider {
-    -fx-padding: 0 0 0 0;
+.main > .split-pane > .split-pane-divider {
+    -fx-padding: 0 1 0 0;
 }
 
-.dark-line-number {
-    -fx-text-fill: white !important;
-    -fx-background-color: #222222 !important;
-}
-
-.tree-view {
+.main .tree-view {
     -fx-focus-traversable: false;
 }
 
-.list-view {
-    /*-fx-focus-traversable: false;*/
+.main > .dark-line-number {
+    -fx-text-fill: white !important;
+    -fx-background-color: #222222 !important;
 }

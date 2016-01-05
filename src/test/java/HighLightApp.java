@@ -1,5 +1,6 @@
 import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.Logger;
+import com.prhythm.app.remotetail.core.HighLightEditorController;
 import com.prhythm.core.generic.data.Singleton;
 import com.prhythm.core.generic.exception.RecessiveException;
 import com.prhythm.core.generic.logging.GenericLogger;
@@ -79,6 +80,9 @@ public class HighLightApp extends Application {
         stage.setScene(scene);
         stage.setMinWidth(400);
         stage.setMinHeight(500);
+
+        HighLightEditorController controller = loader.getController();
+        controller.load();
 
         // 顯示
         stage.show();

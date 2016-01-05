@@ -31,19 +31,19 @@
                     </GridPane.margin>
                 </Button>
                 <Button mnemonicParsing="false" prefWidth="90.0" text="Delete" GridPane.columnIndex="1"
-                        GridPane.halignment="CENTER" GridPane.hgrow="ALWAYS" onAction="#removeRule">
+                        GridPane.halignment="CENTER" GridPane.hgrow="ALWAYS" onAction="#removeRule" fx:id="removeItem">
                     <GridPane.margin>
                         <Insets right="2.0"/>
                     </GridPane.margin>
                 </Button>
                 <Button mnemonicParsing="false" prefWidth="90.0" text="Move Up" GridPane.columnIndex="2"
-                        GridPane.halignment="CENTER" GridPane.hgrow="ALWAYS" onAction="#moveRuleUp">
+                        GridPane.halignment="CENTER" GridPane.hgrow="ALWAYS" onAction="#moveRuleUp" fx:id="moveUp">
                     <GridPane.margin>
                         <Insets right="2.0"/>
                     </GridPane.margin>
                 </Button>
                 <Button mnemonicParsing="false" prefWidth="90.0" text="Move Down" GridPane.columnIndex="3"
-                        GridPane.halignment="CENTER" GridPane.hgrow="ALWAYS" onAction="#moveRuleDown"/>
+                        GridPane.halignment="CENTER" GridPane.hgrow="ALWAYS" onAction="#moveRuleDown" fx:id="moveDown"/>
             </children>
             <VBox.margin>
                 <Insets top="15.0"/>

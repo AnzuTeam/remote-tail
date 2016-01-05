@@ -19,7 +19,7 @@ public class HighLight {
     /**
      * 符合的 {@link java.util.regex.Pattern} 字串
      */
-    boolean markSearchPattern;
+    String pattern;
 
     /**
      * 文字顏色
@@ -41,9 +41,9 @@ public class HighLight {
     public HighLight() {
     }
 
-    public HighLight(boolean ignoreCase, boolean markSearchPattern, Color foreground, Color background, boolean bold, boolean italic) {
+    public HighLight(boolean ignoreCase, String pattern, Color foreground, Color background, boolean bold, boolean italic) {
         this.ignoreCase = ignoreCase;
-        this.markSearchPattern = markSearchPattern;
+        this.pattern = pattern;
         this.foreground = foreground;
         this.background = background;
         this.bold = bold;
@@ -58,12 +58,12 @@ public class HighLight {
         this.ignoreCase = ignoreCase;
     }
 
-    public boolean isMarkSearchPattern() {
-        return markSearchPattern;
+    public String getPattern() {
+        return pattern;
     }
 
-    public void setMarkSearchPattern(boolean markSearchPattern) {
-        this.markSearchPattern = markSearchPattern;
+    public void setPattern(String pattern) {
+        this.pattern = pattern;
     }
 
     public Color getForeground() {
@@ -98,4 +98,18 @@ public class HighLight {
         this.italic = italic;
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        HighLight highLight = (HighLight) o;
+
+        return pattern.equals(highLight.pattern);
+    }
+
+    @Override
+    public int hashCode() {
+        return pattern.hashCode();
+    }
 }

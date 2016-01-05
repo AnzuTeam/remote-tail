@@ -12,7 +12,18 @@
         <charset>utf-8</charset>
         <theme>Dark</theme>
     </preference>
-
+    <highLights>
+        <markSearchPattern>true</markSearchPattern>
+        <highLight>
+            <ignoreCase>false</ignoreCase>
+            <pattern>ERROR</pattern>
+            <foreground>0xb31a1aff</foreground>
+            <background>0xffffff00</background>
+            <bold>false</bold>
+            <italic>false</italic>
+            <order>10</order>
+        </highLight>
+    </highLights>
     <servers>
         <server>
             <name>10.64.33.95 (logs)</name>

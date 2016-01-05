@@ -58,8 +58,8 @@ public class HighLightListCell extends ListCell<HighLight> {
             // 文字顏色／背景色
             render.setStyle(String.format(
                     "-fx-background-color: #%s; -fx-text-fill: #%s;",
-                    item.getBackground().toString().substring(2),
-                    item.getForeground().toString().substring(2)
+                    item.getBackground().substring(2),
+                    item.getForeground().substring(2)
             ));
             // pattern
             pattern.setText(item.getPattern());

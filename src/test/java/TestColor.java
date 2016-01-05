@@ -11,7 +11,10 @@ public class TestColor {
 //            ColorPicker p;
 //            p.getValue().toString();
 
+
         System.out.println(Color.RED);
+        Color c = Color.valueOf("0xff0000ff");
+        System.out.println(c);
     }
 
 }

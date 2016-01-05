@@ -7,6 +7,7 @@ import com.prhythm.app.remotetail.models.HighLights;
 import com.prhythm.core.generic.data.Singleton;
 import com.prhythm.core.generic.util.Cube;
 import com.prhythm.core.generic.util.Strings;
+import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
@@ -78,8 +79,8 @@ public class HighLightEditorController {
                     bold.setSelected(false);
                     italic.setSelected(false);
                 } else {
-                    foreground.setValue(newValue.getForeground());
-                    background.setValue(newValue.getBackground());
+                    foreground.setValue(Color.valueOf(newValue.getForeground()));
+                    background.setValue(Color.valueOf(newValue.getBackground()));
                     patternText.setText(newValue.getPattern());
                     ignoreCase.setSelected(newValue.isIgnoreCase());
                     bold.setSelected(newValue.isBold());
@@ -106,8 +107,8 @@ public class HighLightEditorController {
 
         // 建立資料
         HighLight value = new HighLight();
-        value.setForeground(foreground.getValue());
-        value.setBackground(background.getValue());
+        value.setForeground(foreground.getValue().toString());
+        value.setBackground(background.getValue().toString());
         value.setPattern(patternText.getText().trim());
         value.setIgnoreCase(ignoreCase.isSelected());
         value.setBold(bold.isSelected());
@@ -211,7 +212,7 @@ public class HighLightEditorController {
     void foregroundAction(ActionEvent actionEvent) {
         HighLight selected = getSelected();
         if (selected != null) {
-            selected.setForeground(foreground.getValue());
+            selected.setForeground(foreground.getValue().toString());
             rules.refresh();
         }
     }
@@ -220,9 +221,15 @@ public class HighLightEditorController {
     void backgroundAction(ActionEvent actionEvent) {
         HighLight selected = getSelected();
         if (selected != null) {
-            selected.setBackground(background.getValue());
+            selected.setBackground(background.getValue().toString());
             rules.refresh();
         }
     }
 
+    public void focus() {
+        Platform.runLater(() -> {
+            patternText.requestFocus();
+            patternText.deselect();
+        });
+    }
 }

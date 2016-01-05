@@ -49,6 +49,7 @@ public class MainController {
     final public static String LAYOUT_LOG_EDITOR = "/com/prhythm/app/remotetail/core/edit.log.fxml";
     final public static String LAYOUT_PREFERENCE_EDITOR = "/com/prhythm/app/remotetail/core/edit.preference.fxml";
     final public static String LAYOUT_GO_TO_EDITOR = "/com/prhythm/app/remotetail/core/edit.goto.fxml";
+    final public static String LAYOUT_HIGH_LIGHT_EDITOR = "/com/prhythm/app/remotetail/core/edit.high.light.fxml";
 
     final public static String ICON_SERVER = "/com/prhythm/app/remotetail/icons/icon_server.png";
     final public static String ICON_LOG = "/com/prhythm/app/remotetail/icons/icon_log.png";
@@ -661,7 +662,7 @@ public class MainController {
      * @param event
      */
     @FXML
-    void hotKeyTrigger(KeyEvent event) {
+    void hotKeyTyped(KeyEvent event) {
         // 複制文字
         if ("c".equalsIgnoreCase(event.getCharacter()) && (event.isMetaDown() || event.isControlDown())) {
             //noinspection unchecked
@@ -844,7 +845,30 @@ public class MainController {
 
     @FXML
     void highLightClick(Event event) {
-        // todo
+        // 開啟 high light 設定
+        Dialog<Object> dialog = new Dialog<>();
+        dialog.setTitle(Singleton.of(ResourceBundle.class).getString("rmt.dialog.high.light.title"));
+
+        HighLightEditorController controller;
+        VBox content;
+
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource(LAYOUT_HIGH_LIGHT_EDITOR), Singleton.of(ResourceBundle.class));
+            content = loader.load();
+            controller = loader.getController();
+            controller.load();
+        } catch (IOException e) {
+            throw new RecessiveException(e.getMessage(), e);
+        }
+
+        // 更新外觀
+        App.changeTheme(dialog.getDialogPane().getStylesheets(), Singleton.of(DataWrapper.class).getPreference().getTheme());
+
+        dialog.getDialogPane().setContent(content);
+        dialog.getDialogPane().getButtonTypes().addAll(ButtonType.APPLY);
+
+        controller.focus();
+        dialog.show();
     }
 
 }

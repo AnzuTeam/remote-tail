@@ -1,7 +1,5 @@
 package com.prhythm.app.remotetail.models;
 
-import javafx.scene.paint.Color;
-
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 
@@ -24,11 +22,11 @@ public class HighLight {
     /**
      * 文字顏色
      */
-    Color foreground;
+    String foreground;
     /**
      * 背景顏色
      */
-    Color background;
+    String background;
     /**
      * 粗體
      */
@@ -45,7 +43,7 @@ public class HighLight {
     public HighLight() {
     }
 
-    public HighLight(boolean ignoreCase, String pattern, Color foreground, Color background, boolean bold, boolean italic) {
+    public HighLight(boolean ignoreCase, String pattern, String foreground, String background, boolean bold, boolean italic) {
         this.ignoreCase = ignoreCase;
         this.pattern = pattern;
         this.foreground = foreground;
@@ -70,19 +68,19 @@ public class HighLight {
         this.pattern = pattern;
     }
 
-    public Color getForeground() {
+    public String getForeground() {
         return foreground;
     }
 
-    public void setForeground(Color foreground) {
+    public void setForeground(String foreground) {
         this.foreground = foreground;
     }
 
-    public Color getBackground() {
+    public String getBackground() {
         return background;
     }
 
-    public void setBackground(Color background) {
+    public void setBackground(String background) {
         this.background = background;
     }
 

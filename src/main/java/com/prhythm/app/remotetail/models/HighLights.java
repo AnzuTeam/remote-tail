@@ -1,5 +1,8 @@
 package com.prhythm.app.remotetail.models;
 
+import com.prhythm.core.generic.util.Cube;
+import com.prhythm.core.generic.util.Strings;
+
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
@@ -7,6 +10,7 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
+import java.util.regex.Pattern;
 
 /**
  * 顯著標示
@@ -23,6 +27,22 @@ public class HighLights implements Iterable<HighLight> {
     public HighLights() {
         highLights = new HashSet<>();
     }
+
+    /**
+     * 找出符合的 {@link HighLight} 規則
+     *
+     * @param text
+     * @return
+     */
+    public HighLight match(final String text) {
+        if (Strings.isNullOrWhiteSpace(text)) return null;
+        return Cube.from(highLights).first((item, index) -> {
+            Pattern expression = item.getExpression();
+            return expression != null && expression.matcher(text).find();
+        });
+    }
+
+    // set interface
 
     public int size() {
         return highLights.size();

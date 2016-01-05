@@ -1,7 +1,10 @@
 package com.prhythm.app.remotetail.models;
 
+import com.prhythm.core.generic.util.Strings;
+
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
+import java.util.regex.Pattern;
 
 /**
  * 顯著標示項目
@@ -40,6 +43,8 @@ public class HighLight {
      */
     int order;
 
+    transient Pattern expression;
+
     public HighLight() {
     }
 
@@ -51,6 +56,29 @@ public class HighLight {
         this.bold = bold;
         this.italic = italic;
     }
+
+    /**
+     * 取得目前設定的 {@link Pattern}
+     *
+     * @return
+     */
+    public Pattern getExpression() {
+        if (Strings.isNullOrWhiteSpace(pattern)) {
+            return null;
+        } else {
+            if (expression == null) {
+                return expression = Pattern.compile(pattern, isIgnoreCase() ? Pattern.CASE_INSENSITIVE : 0);
+            } else {
+                if (pattern.equals(expression.pattern())) {
+                    return expression;
+                } else {
+                    return expression = Pattern.compile(pattern, isIgnoreCase() ? Pattern.CASE_INSENSITIVE : 0);
+                }
+            }
+        }
+    }
+
+    // getter & setter
 
     public boolean isIgnoreCase() {
         return ignoreCase;

@@ -874,7 +874,7 @@ public class MainController {
         App.changeTheme(dialog.getDialogPane().getStylesheets(), Singleton.of(DataWrapper.class).getPreference().getTheme());
 
         dialog.getDialogPane().setContent(content);
-        dialog.getDialogPane().getButtonTypes().addAll(ButtonType.APPLY);
+        dialog.getDialogPane().getButtonTypes().addAll(ButtonType.CLOSE);
 
         controller.focus();
         dialog.show();

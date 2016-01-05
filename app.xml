@@ -1,16 +1,16 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <wrapper>
     <window>
-        <height>648.0</height>
-        <width>1157.0</width>
-        <x>250.0</x>
-        <y>144.0</y>
+        <height>615.0</height>
+        <width>1047.0</width>
+        <x>280.0</x>
+        <y>130.0</y>
     </window>
     <preference>
         <fontFamily>Courier New</fontFamily>
         <fontSize>13.0</fontSize>
         <charset>utf-8</charset>
-        <theme>White</theme>
+        <theme>Dark</theme>
     </preference>
     <highLights>
         <markSearchPattern>true</markSearchPattern>

@@ -7,6 +7,10 @@
     -fx-background-color: #222222 !important;
 }
 
-.list-view {
+.tree-view {
     -fx-focus-traversable: false;
+}
+
+.list-view {
+    /*-fx-focus-traversable: false;*/
 }

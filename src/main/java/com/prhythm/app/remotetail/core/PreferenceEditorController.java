@@ -1,7 +1,7 @@
 package com.prhythm.app.remotetail.core;
 
 import com.prhythm.app.remotetail.App;
-import com.prhythm.app.remotetail.data.ListLineItem;
+import com.prhythm.app.remotetail.data.LineListCell;
 import com.prhythm.app.remotetail.models.Preference;
 import com.prhythm.core.generic.data.Singleton;
 import com.prhythm.core.generic.util.Strings;
@@ -61,7 +61,7 @@ public class PreferenceEditorController {
         } else {
             try {
                 preference.setFontSize(Double.parseDouble(fontSize.getText().trim()));
-                ListLineItem.MAX_INDEX_WIDTH = 1;
+                LineListCell.MAX_INDEX_WIDTH = 1;
             } catch (Exception e) {
                 result = false;
             }

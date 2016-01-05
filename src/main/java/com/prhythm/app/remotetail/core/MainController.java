@@ -141,7 +141,7 @@ public class MainController {
 
         // 變更檔案呈現（包含行號與文字）
         //noinspection unchecked
-        contents.setCellFactory(param -> new ListLineItem());
+        contents.setCellFactory(param -> new LineListCell());
 
         // 設定 log 可多選
         contents.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
@@ -432,6 +432,9 @@ public class MainController {
         searchBar.setManaged(false);
         searchBar.setVisible(false);
 
+        // 關閉 tail
+        setTailing(false);
+
         if (contents.getItems() instanceof RemoteLogReaderList) {
             /** 若不是同一個檔案時，先清空畫面 **/
             // 取得現在檔案
@@ -712,6 +715,9 @@ public class MainController {
             if (!server.present() || !log.present()) return;
             if (!server.value().isConnected()) return;
         }
+
+        // 停止 tail
+        setTailing(false);
 
         // 開啟行號輸入
         Dialog<Object> dialog = new Dialog<>();

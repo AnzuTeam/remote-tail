@@ -14,7 +14,7 @@ import javafx.scene.text.Font;
  * Log 行
  * Created by nanashi07 on 15/12/31.
  */
-public class ListLineItem extends ListCell<Line> {
+public class LineListCell extends ListCell<Line> {
 
     public static double MAX_INDEX_WIDTH = 0;
 
@@ -22,7 +22,7 @@ public class ListLineItem extends ListCell<Line> {
     Label rowId;
     Label text;
 
-    public ListLineItem() {
+    public LineListCell() {
         hBox = new HBox();
         hBox.getChildren().addAll(rowId = new Label(), text = new Label());
 

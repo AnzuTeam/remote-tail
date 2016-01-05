@@ -79,8 +79,8 @@ public class HighLightEditorController {
                     bold.setSelected(false);
                     italic.setSelected(false);
                 } else {
-                    foreground.setValue(Color.valueOf(newValue.getForeground()));
-                    background.setValue(Color.valueOf(newValue.getBackground()));
+                    foreground.setValue(Color.valueOf("#" + newValue.getForeground().substring(2)));
+                    background.setValue(Color.valueOf("#" + newValue.getBackground().substring(2)));
                     patternText.setText(newValue.getPattern());
                     ignoreCase.setSelected(newValue.isIgnoreCase());
                     bold.setSelected(newValue.isBold());

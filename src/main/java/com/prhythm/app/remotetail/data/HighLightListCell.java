@@ -57,7 +57,7 @@ public class HighLightListCell extends ListCell<HighLight> {
             ));
             // 文字顏色／背景色
             render.setStyle(String.format(
-                    "-fx-background-color: #%s; -fx-text-fill: #%s;",
+                    "-fx-background-color: #%s !important; -fx-text-fill: #%s !important;",
                     item.getBackground().substring(2),
                     item.getForeground().substring(2)
             ));
@@ -67,4 +67,5 @@ public class HighLightListCell extends ListCell<HighLight> {
             setGraphic(hBox);
         }
     }
+
 }

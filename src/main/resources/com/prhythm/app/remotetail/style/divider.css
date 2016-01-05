@@ -1,8 +1,8 @@
-.main > .split-pane > .split-pane-divider {
+.split-pane > .split-pane-divider {
     -fx-padding: 0 1 0 0;
 }
 
-.main .tree-view {
+.tree-view {
     -fx-focus-traversable: false;
 }
 

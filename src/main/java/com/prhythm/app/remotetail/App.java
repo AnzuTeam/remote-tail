@@ -12,12 +12,11 @@ import com.prhythm.core.generic.logging.GenericLogger;
 import com.prhythm.core.generic.logging.Level;
 import com.prhythm.core.generic.logging.LogFactory;
 import com.prhythm.core.generic.logging.Logs;
-import com.prhythm.core.generic.util.Strings;
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
-import javafx.scene.control.Alert;
 import javafx.scene.image.Image;
 import javafx.stage.Stage;
 
@@ -46,6 +45,12 @@ public class App extends Application {
     final static double MIN_WIDTH = 400;
     final static double MIN_HEIGHT = 300;
 
+    /**
+     * 變更外觀
+     *
+     * @param styleSheets
+     * @param theme
+     */
     public static void changeTheme(ObservableList<String> styleSheets, Preference.Theme theme) {
         switch (theme) {
             case White:
@@ -55,6 +60,20 @@ public class App extends Application {
                 styleSheets.add(App.STYLE_DARK_APP);
                 break;
         }
+    }
+
+    public static void error(String message, Object... args) {
+        Platform.runLater(() -> {
+            MainController controller = Singleton.of(FXMLLoader.class).getController();
+            controller.error(args.length == 0 ? message : String.format(message, args));
+        });
+    }
+
+    public static void info(String message, Object... args) {
+        Platform.runLater(() -> {
+            MainController controller = Singleton.of(FXMLLoader.class).getController();
+            controller.info(args.length == 0 ? message : String.format(message, args));
+        });
     }
 
     public static void main(String[] args) {
@@ -97,7 +116,10 @@ public class App extends Application {
         Singleton.of(ResourceBundle.getBundle("com.prhythm.app.remotetail.bundles.ui"));
 
         // 未處理錯誤
-        Thread.setDefaultUncaughtExceptionHandler((t, e) -> Logs.error(RecessiveException.unwrapp(e)));
+        Thread.setDefaultUncaughtExceptionHandler((t, e) -> {
+            Logs.error(RecessiveException.unwrapp(e));
+            App.error(e.getMessage());
+        });
 
         launch(args);
     }
@@ -141,7 +163,7 @@ public class App extends Application {
                 // 儲存資料
                 wrapper.save(new File(CONFIG_FILE));
             } catch (JAXBException e) {
-                alert("儲存資料失敗", e);
+                Logs.error("儲存資料失敗: %s", e);
             }
         });
 
@@ -149,20 +171,12 @@ public class App extends Application {
         try {
             initialize(stage);
         } catch (JAXBException e) {
-            alert("初始化資料失敗", e);
+            Logs.error("初始化資料失敗: %s", e);
+            App.error("初始化資料失敗: %s", e);
         }
 
         // 顯示
         stage.show();
-    }
-
-    @Deprecated
-    void alert(String title, Throwable ex) {
-        ex.printStackTrace();
-        Alert alert = new Alert(Alert.AlertType.ERROR);
-        alert.setTitle(title);
-        alert.setContentText(Strings.stringify(ex));
-        alert.show();
     }
 
     /**

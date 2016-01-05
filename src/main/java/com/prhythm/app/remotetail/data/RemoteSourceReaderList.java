@@ -21,6 +21,7 @@ import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 /**
+ * 來源讀取
  * Created by nanashi07 on 16/1/4.
  */
 public abstract class RemoteSourceReaderList extends Observable implements ObservableList<Line>, Runnable {
@@ -122,6 +123,7 @@ public abstract class RemoteSourceReaderList extends Observable implements Obser
                 try {
                     readLines();
                 } catch (Exception e) {
+                    App.error(e.toString());
                     Logs.error("讀取 log 發生錯誤: %s", e);
                 }
             }
@@ -179,6 +181,7 @@ public abstract class RemoteSourceReaderList extends Observable implements Obser
         // 指令 sed : 顯示指定行的內容
         String cmd = String.format("sed -n %d,%dp %s", min, max, path);
         Logs.trace("讀取指定行(%s)", cmd);
+        App.info("讀取 %s 由 %d 至 %d", path, min, max);
         channel.setCommand(cmd);
         InputStream in = channel.getInputStream();
         channel.connect();

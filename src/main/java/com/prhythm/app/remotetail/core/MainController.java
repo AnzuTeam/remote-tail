@@ -53,6 +53,7 @@ public class MainController {
 
     final public static String ICON_SERVER = "/com/prhythm/app/remotetail/icons/icon_server.png";
     final public static String ICON_LOG = "/com/prhythm/app/remotetail/icons/icon_log.png";
+    final public static String ICON_ERROR = "/com/prhythm/app/remotetail/icons/icon_error.png";
 
     @FXML
     ListView contents;
@@ -68,6 +69,8 @@ public class MainController {
     HBox searchBar;
     @FXML
     TextField searchText;
+    @FXML
+    Label status;
 
     ContextMenu serverMenu;
     ContextMenu logMenu;
@@ -490,7 +493,7 @@ public class MainController {
                     // 連接時移至底部
                     contents.scrollTo(list.size() - 1);
                 } catch (Exception e) {
-                    Logs.error(RecessiveException.unwrapp(e));
+                    Logs.warn(RecessiveException.unwrapp(e));
                     //noinspection unchecked
                     contents.setItems(FXCollections.observableArrayList());
                 }
@@ -843,7 +846,7 @@ public class MainController {
                     // 連接時移至底部
                     contents.scrollTo(list.size() - 1);
                 } catch (Exception e) {
-                    Logs.error(RecessiveException.unwrapp(e));
+                    Logs.warn(RecessiveException.unwrapp(e));
                     //noinspection unchecked
                     contents.setItems(FXCollections.observableArrayList());
                 }
@@ -878,6 +881,16 @@ public class MainController {
 
         controller.focus();
         dialog.show();
+    }
+
+    public void error(String message) {
+        status.setText(message);
+        status.setGraphic(getIcon(ICON_ERROR));
+    }
+
+    public void info(String message) {
+        status.setText(message);
+        status.setGraphic(null);
     }
 
 }

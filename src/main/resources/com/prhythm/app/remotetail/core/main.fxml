@@ -6,8 +6,8 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.*?>
 <BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity"
-            onKeyTyped="#hotKeyTyped" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1"
-            fx:controller="com.prhythm.app.remotetail.core.MainController" styleClass="main">
+            onKeyTyped="#hotKeyTyped" xmlns="http://javafx.com/javafx/8"
+            xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.prhythm.app.remotetail.core.MainController">
     <center>
         <SplitPane dividerPositions="0.25" BorderPane.alignment="CENTER">
             <items>
@@ -17,26 +17,26 @@
                         <ListView fx:id="contents" BorderPane.alignment="CENTER"/>
                     </center>
                     <top>
-                        <HBox fx:id="searchBar" BorderPane.alignment="CENTER" managed="false" visible="false">
+                        <HBox fx:id="searchBar" managed="false" visible="false" BorderPane.alignment="CENTER">
                             <children>
-                                <TextField HBox.hgrow="ALWAYS" fx:id="searchText" onKeyPressed="#searchTrigger"/>
-                                <Button mnemonicParsing="false" text="%rmt.search.button" onAction="#searchClick"/>
+                                <TextField fx:id="searchText" onKeyPressed="#searchTrigger" HBox.hgrow="ALWAYS"/>
+                                <Button mnemonicParsing="false" onAction="#searchClick" text="%rmt.search.button"/>
                             </children>
                         </HBox>
                     </top>
-                    <bottom>
-                        <TextArea BorderPane.alignment="CENTER" managed="false" visible="false"/>
-                    </bottom>
                 </BorderPane>
             </items>
         </SplitPane>
     </center>
     <bottom>
-        <HBox BorderPane.alignment="CENTER">
+        <HBox BorderPane.alignment="CENTER" styleClass="status-bar">
             <children>
                 <Pane HBox.hgrow="ALWAYS"/>
-                <Label text="Status"/>
+                <Label fx:id="status" styleClass="status"/>
             </children>
+            <padding>
+                <Insets left="5" right="5" top="2" bottom="2"/>
+            </padding>
         </HBox>
     </bottom>
     <top>
@@ -99,8 +99,6 @@
                         <Insets bottom="5.0" left="5.0" right="5.0" top="5.0"/>
                     </HBox.margin>
                 </BorderPane>
-
-
                 <BorderPane onMouseClicked="#highLightClick">
                     <center>
                         <ImageView BorderPane.alignment="CENTER">

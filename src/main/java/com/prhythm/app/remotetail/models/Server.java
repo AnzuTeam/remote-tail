@@ -4,6 +4,7 @@ import com.jcraft.jsch.Channel;
 import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.Session;
+import com.prhythm.app.remotetail.App;
 import com.prhythm.core.generic.exception.RecessiveException;
 import com.prhythm.core.generic.logging.Logs;
 import com.prhythm.core.generic.util.Cube;
@@ -90,11 +91,12 @@ public class Server {
      */
     public void connect() {
         try {
+            App.info("Connecting to %s port %d", host, port);
             JSch jsch = new JSch();
             session = jsch.getSession(account, host, port);
             session.setPassword(password);
             session.connect();
-            Logs.info("Connect %s", this);
+            App.info("%s connected", this);
         } catch (Exception e) {
             throw new RecessiveException(e.getMessage(), e);
         }
@@ -105,7 +107,10 @@ public class Server {
      */
     public void disconnect() {
         if (session != null && session.isConnected()) {
+            App.info("Disconnecting %n", this);
+            Logs.info("Disconnecting %n", this);
             session.disconnect();
+            App.info("%n disconnected", this);
 
             // clear temp log
             Cube.from(logPaths).each((item, index) -> {
@@ -113,7 +118,6 @@ public class Server {
                 return true;
             });
 
-            Logs.info("Disconnect %n", this);
         }
     }
 

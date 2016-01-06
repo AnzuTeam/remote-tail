@@ -31,6 +31,7 @@ public class HighLightListCell extends ListCell<HighLight> {
     Label pattern;
 
     public HighLightListCell() {
+        // 載入 UI 設計
         FXMLLoader loader = new FXMLLoader(LAYOUT_URL, Singleton.of(ResourceBundle.class));
         try {
             hBox = loader.load();

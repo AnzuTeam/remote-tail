@@ -11,17 +11,21 @@ import java.util.Observer;
  */
 public class Line implements Observer {
 
+    /**
+     * 行號
+     */
     int index;
+    /**
+     * 行的內容
+     */
     String content;
-    boolean loaded;
 
     public Line() {
     }
 
-    public Line(int index, String content, boolean loaded) {
+    public Line(int index, String content) {
         this.index = index;
         this.content = content;
-        this.loaded = loaded;
     }
 
     public int getIndex() {
@@ -62,12 +66,11 @@ public class Line implements Observer {
 
     @Override
     public void update(Observable o, Object arg) {
-        if (arg != null && arg instanceof LogPath) {
-            LogPath path = (LogPath) arg;
-            if (path.hasLine(index)) {
-                content = path.atLine(index);
-                loaded = true;
-            }
+        if (arg == null || !(arg instanceof LogPath)) return;
+
+        LogPath path = (LogPath) arg;
+        if (path.hasLine(index)) {
+            content = path.atLine(index);
         }
     }
 }

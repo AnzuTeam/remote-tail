@@ -67,6 +67,7 @@ public class HighLightApp extends Application {
     @Override
     public void start(Stage stage) throws Exception {
         Singleton.of(stage);
+        // 載入 UI 設計
         FXMLLoader loader = Singleton.of(new FXMLLoader(
                 getClass().getResource("/com/prhythm/app/remotetail/core/edit.high.light.fxml"),
                 Singleton.of(ResourceBundle.class)
@@ -75,7 +76,7 @@ public class HighLightApp extends Application {
         // 設定預設屬性
         Scene scene = Singleton.of(new Scene(loader.load(), 400, 300));
         // divider style
-//        scene.getStylesheets().add(STYLE_SPLIT_PANE_DIVIDER);
+//        scene.getStylesheets().add(STYLE_DEFAULT);
         stage.setTitle("High Light");
         stage.setScene(scene);
         stage.setMinWidth(400);

@@ -41,6 +41,7 @@ public class LineListCell extends ListCell<Line> {
     public LineListCell() {
         setPadding(new Insets(0, 0, 0, 0));
 
+        // 載入 UI 設計
         FXMLLoader loader = new FXMLLoader(LAYOUT_URL, Singleton.of(ResourceBundle.class));
         try {
             hBox = loader.load();
@@ -60,21 +61,28 @@ public class LineListCell extends ListCell<Line> {
             children.clear();
             setGraphic(null);
         } else {
+            // 取得設定值
             DataWrapper wrapper = Singleton.of(DataWrapper.class);
             Preference preference = wrapper.getPreference();
             HighLights highLights = wrapper.getHighLights();
             String searchText = ((MainController) Singleton.of(FXMLLoader.class).getController()).getSearchText();
 
+            // 計算行號欄的寬
             String num = String.valueOf(item.getIndex());
             MAX_INDEX_WIDTH = Math.max(MAX_INDEX_WIDTH, num.length() * (rowId.getFont().getSize() * 0.8));
 
+            // 設定顯示的行號
             rowId.setText(num);
             rowId.setFont(Font.font(preference.getFontFamily(), preference.getFontSize()));
             rowId.setPrefWidth(MAX_INDEX_WIDTH);
 
+            /** 顯示 log 內容 **/
+            // 先清除資料
             children.clear();
+            // 取得符合的顯著標示設定
             HighLight match = highLights.match(item.toString());
             if (highLights.isMarkSearchPattern() && !Strings.isNullOrWhiteSpace(searchText)) {
+                // 處理搜尋文字的顯著標示
                 String[] values = item.toString().split(searchText);
                 if (match == null) {
                     for (int i = 0; i < values.length; i++) {
@@ -106,22 +114,41 @@ public class LineListCell extends ListCell<Line> {
         }
     }
 
+    /**
+     * 建立標準（無顯著標示）的 log 內容
+     *
+     * @param preference 偏好設定
+     * @param value      log 文字內容
+     * @return
+     */
     Label createStandardText(Preference preference, String value) {
         Label text = new Label(value);
         text.setFont(Font.font(preference.getFontFamily(), preference.getFontSize()));
         return text;
     }
 
+    /**
+     * 建立有搜尋文字的顯著標示的 log 內容
+     *
+     * @param preference 偏好設定
+     * @param match      符合的 {@link HighLight} 設定
+     * @param value      log 文字內容
+     * @return
+     */
     Label createHighLightedSearchPattern(Preference preference, HighLight match, String value) {
         Label text = new Label(value);
         if (match == null) {
             text.setFont(Font.font(preference.getFontFamily(), preference.getFontSize()));
             // 顏色
-            text.setStyle(
-                    preference.getTheme() == Preference.Theme.White
-                            ? "-fx-background-color: #222222; -fx-text-fill: #dddddd;" :
-                            "-fx-background-color: #dddddd; -fx-text-fill: #222222;"
-            );
+            switch (preference.getTheme()) {
+                default:
+                case White:
+                    text.setStyle("-fx-background-color: #222222; -fx-text-fill: #dddddd;");
+                    break;
+                case Dark:
+                    text.setStyle("-fx-background-color: #dddddd; -fx-text-fill: #222222;");
+                    break;
+            }
         } else {
             // 字體
             text.setFont(Font.font(
@@ -133,20 +160,20 @@ public class LineListCell extends ListCell<Line> {
             // 顏色
             text.setStyle(String.format(
                     "-fx-background-color: #%s; -fx-text-fill: #%s;",
-                    opposite(match.getBackground().substring(2, 8)),
-                    opposite(match.getForeground().substring(2, 8))
+                    oppositeColor(match.getBackground().substring(2, 8)),
+                    oppositeColor(match.getForeground().substring(2, 8))
             ));
         }
         return text;
     }
 
     /**
-     * 計算反色
+     * 計算對比色
      *
-     * @param color
+     * @param color 顏色(RRGGBB)
      * @return
      */
-    String opposite(String color) {
+    String oppositeColor(String color) {
         color = color.toUpperCase();
         String result = "";
         char ch;
@@ -162,6 +189,14 @@ public class LineListCell extends ListCell<Line> {
         return result;
     }
 
+    /**
+     * 建立顯著標示的 log 內容
+     *
+     * @param preference 偏好設定
+     * @param match      符合的 {@link HighLight} 設定
+     * @param value      log 文字內容
+     * @return
+     */
     Label createHighLightedText(Preference preference, HighLight match, String value) {
         Label text = new Label(value);
         // 字體

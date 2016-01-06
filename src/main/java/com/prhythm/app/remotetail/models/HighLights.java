@@ -36,10 +36,12 @@ public class HighLights implements Iterable<HighLight> {
      */
     public HighLight match(final String text) {
         if (Strings.isNullOrWhiteSpace(text)) return null;
-        return Cube.from(highLights).first((item, index) -> {
-            Pattern expression = item.getExpression();
-            return expression != null && expression.matcher(text).find();
-        });
+        return Cube.from(highLights)
+                .orderBy((source, target) -> target.getOrder() - source.getOrder())
+                .first((item, index) -> {
+                    Pattern expression = item.getExpression();
+                    return expression != null && expression.matcher(text).find();
+                });
     }
 
     // set interface

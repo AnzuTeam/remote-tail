@@ -9,11 +9,16 @@ import javafx.scene.control.TextField;
  * 顯示到指定行的視窗
  * Created by nanashi07 on 16/1/4.
  */
-public class GotoLineEditorController {
+public class GotoLineEditorController implements IFocusable {
 
     @FXML
     TextField lineNumber;
 
+    /**
+     * 取得輸入的行數
+     *
+     * @return
+     */
     public Integer selectedLineNumber() {
         if (Strings.isNullOrWhiteSpace(lineNumber.getText())) return null;
         try {
@@ -24,6 +29,7 @@ public class GotoLineEditorController {
         }
     }
 
+    @Override
     public void focus() {
         Platform.runLater(lineNumber::requestFocus);
     }

@@ -1,5 +1,6 @@
 package com.prhythm.app.remotetail.core;
 
+import com.prhythm.app.remotetail.App;
 import com.prhythm.app.remotetail.data.HighLightListCell;
 import com.prhythm.app.remotetail.models.DataWrapper;
 import com.prhythm.app.remotetail.models.HighLight;
@@ -17,12 +18,13 @@ import javafx.scene.control.*;
 import javafx.scene.paint.Color;
 
 import java.util.List;
+import java.util.ResourceBundle;
 
 /**
  * 顯著標示編輯
  * Created by nanashi07 on 16/1/4.
  */
-public class HighLightEditorController {
+public class HighLightEditorController implements IFocusable {
 
     @FXML
     CheckBox searchPattern;
@@ -48,12 +50,16 @@ public class HighLightEditorController {
     @FXML
     Button moveDown;
 
+    /**
+     * 載入目前設定值
+     */
     public void load() {
         HighLights highLights = Singleton.of(DataWrapper.class).getHighLights();
 
         // High light search pattern
         searchPattern.setSelected(highLights.isMarkSearchPattern());
 
+        // 變更 patter 設定值
         patternText.textProperty().addListener((observable, oldValue, newValue) -> {
             HighLight selected = getSelected();
             if (selected != null && !Strings.isNullOrWhiteSpace(newValue)) {
@@ -89,19 +95,28 @@ public class HighLightEditorController {
             }
         });
 
-        // rules
-        //noinspection unchecked
+        // 更新畫面
         flushRules();
     }
 
+    /**
+     * 取得目前選擇的 {@link HighLight} 規則
+     *
+     * @return
+     */
     HighLight getSelected() {
         return (HighLight) rules.getSelectionModel().getSelectedItem();
     }
 
+    /**
+     * 增加 {@link HighLight} 規則
+     *
+     * @param actionEvent 動件事件
+     */
     @FXML
     void addRule(ActionEvent actionEvent) {
         if (Strings.isNullOrWhiteSpace(patternText.getText())) {
-            // todo show error
+            App.error(Singleton.of(ResourceBundle.class).getString("rmt.status.error.high.light.pattern.empty"));
             return;
         }
 
@@ -120,7 +135,7 @@ public class HighLightEditorController {
         //noinspection unchecked
         rules.getItems().add(value);
 
-        // 重置
+        // 重置欄位
         foreground.setValue(Color.WHITE);
         background.setValue(Color.WHITE);
         patternText.setText("");
@@ -129,9 +144,13 @@ public class HighLightEditorController {
         italic.setSelected(false);
     }
 
+    /**
+     * 移除 {@link HighLight} 規則
+     *
+     * @param actionEvent 動件事件
+     */
     @FXML
     void removeRule(ActionEvent actionEvent) {
-        //noinspection unchecked
         HighLight selected = getSelected();
         if (selected != null) {
             Singleton.of(DataWrapper.class).getHighLights().remove(selected);
@@ -140,6 +159,11 @@ public class HighLightEditorController {
         }
     }
 
+    /**
+     * 調整 {@link HighLight} 規則順序
+     *
+     * @param actionEvent 動件事件
+     */
     @FXML
     void moveRuleUp(ActionEvent actionEvent) {
         HighLight selected = getSelected();
@@ -151,6 +175,11 @@ public class HighLightEditorController {
         }
     }
 
+    /**
+     * 調整 {@link HighLight} 規則順序
+     *
+     * @param actionEvent 動件事件
+     */
     @FXML
     void moveRuleDown(ActionEvent actionEvent) {
         HighLight selected = getSelected();
@@ -163,7 +192,7 @@ public class HighLightEditorController {
     }
 
     /**
-     * 重設排序
+     * 重設排序，並更新 {@link HighLight} 顯示畫面
      */
     void flushRules() {
         List<HighLight> values = Cube.from(Singleton.of(DataWrapper.class).getHighLights())
@@ -176,11 +205,21 @@ public class HighLightEditorController {
         rules.setItems(FXCollections.observableArrayList(values));
     }
 
+    /**
+     * 變更顯著標示搜尋內容
+     *
+     * @param actionEvent 動件事件
+     */
     @FXML
     void searchPatternAction(ActionEvent actionEvent) {
         Singleton.of(DataWrapper.class).getHighLights().setMarkSearchPattern(searchPattern.isSelected());
     }
 
+    /**
+     * 變更 {@link HighLight} 區分大小寫規則
+     *
+     * @param actionEvent 動件事件
+     */
     @FXML
     void ignoreCaseAction(ActionEvent actionEvent) {
         HighLight selected = getSelected();
@@ -190,6 +229,11 @@ public class HighLightEditorController {
         }
     }
 
+    /**
+     * 變更 {@link HighLight} 顯示粗體規則
+     *
+     * @param actionEvent 動件事件
+     */
     @FXML
     void boldAction(ActionEvent actionEvent) {
         HighLight selected = getSelected();
@@ -199,6 +243,11 @@ public class HighLightEditorController {
         }
     }
 
+    /**
+     * 變更 {@link HighLight} 顯示斜體規則
+     *
+     * @param actionEvent 動件事件
+     */
     @FXML
     void italicAction(ActionEvent actionEvent) {
         HighLight selected = getSelected();
@@ -208,6 +257,11 @@ public class HighLightEditorController {
         }
     }
 
+    /**
+     * 變更 {@link HighLight} 顯示文字顏色
+     *
+     * @param actionEvent 動件事件
+     */
     @FXML
     void foregroundAction(ActionEvent actionEvent) {
         HighLight selected = getSelected();
@@ -217,6 +271,11 @@ public class HighLightEditorController {
         }
     }
 
+    /**
+     * 變更 {@link HighLight} 顯示背景顏色
+     *
+     * @param actionEvent 動件事件
+     */
     @FXML
     void backgroundAction(ActionEvent actionEvent) {
         HighLight selected = getSelected();
@@ -226,6 +285,7 @@ public class HighLightEditorController {
         }
     }
 
+    @Override
     public void focus() {
         Platform.runLater(() -> {
             patternText.requestFocus();

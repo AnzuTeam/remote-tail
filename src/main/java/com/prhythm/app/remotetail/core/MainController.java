@@ -6,6 +6,7 @@ import com.prhythm.app.remotetail.models.DataWrapper;
 import com.prhythm.app.remotetail.models.LogPath;
 import com.prhythm.app.remotetail.models.Preference;
 import com.prhythm.app.remotetail.models.Server;
+import com.prhythm.core.generic.data.Once;
 import com.prhythm.core.generic.data.OutContent;
 import com.prhythm.core.generic.data.Singleton;
 import com.prhythm.core.generic.exception.RecessiveException;
@@ -72,17 +73,127 @@ public class MainController {
     @FXML
     Label status;
 
-    ContextMenu serverMenu;
-    ContextMenu logMenu;
+    /**
+     * 點選 {@link Server} 的右鍵選單
+     */
+    Once<ContextMenu> serverMenu = new Once<ContextMenu>() {
+        @Override
+        protected ContextMenu get() throws Exception {
+            ContextMenu menu = new ContextMenu();
+            ObservableList<MenuItem> items = menu.getItems();
+            MenuItem menuItem;
+
+            // 新增 log
+            menuItem = new MenuItem(Singleton.of(ResourceBundle.class).getString("rmt.tree.server.context.menu.add.log"));
+            menuItem.setOnAction(MainController.this::addLogClick);
+            items.add(menuItem);
+
+            // 修改
+            menuItem = new MenuItem(Singleton.of(ResourceBundle.class).getString("rmt.tree.server.context.menu.edit"));
+            menuItem.setOnAction(evt -> {
+                // 重新取值
+                TreeItem node = (TreeItem) areas.getSelectionModel().getSelectedItem();
+                Server server = (Server) node.getValue();
+
+                createEditDialog(server);
+            });
+            items.add(menuItem);
+
+            // 刪除
+            menuItem = new MenuItem(Singleton.of(ResourceBundle.class).getString("rmt.tree.server.context.menu.delete"));
+            menuItem.setOnAction(evt -> {
+                // 重新取值
+                TreeItem node = (TreeItem) areas.getSelectionModel().getSelectedItem();
+                OutContent<Server> server = new OutContent<>();
+                OutContent<LogPath> log = new OutContent<>();
+                findValue(node, server, log);
+
+                Alert alert = new Alert(
+                        Alert.AlertType.CONFIRMATION,
+                        String.format(Singleton.of(ResourceBundle.class).getString("rmt.dialog.delete.server"), server),
+                        ButtonType.YES, ButtonType.NO
+                );
+
+                // 更新外觀
+                App.changeTheme(alert.getDialogPane().getStylesheets(), Singleton.of(DataWrapper.class).getPreference().getTheme());
+
+                Optional<ButtonType> result = alert.showAndWait();
+
+                if (result.isPresent() && result.get() == ButtonType.YES) {
+                    // 移除資料
+                    Singleton.of(DataWrapper.class).getServers().remove(server.value());
+                    // 移除顯示
+                    node.getParent().getChildren().remove(node);
+                }
+            });
+            items.add(menuItem);
+            return menu;
+        }
+    };
+
+    /**
+     * 點選 {@link LogPath} 的右鍵選單
+     */
+    Once<ContextMenu> logMenu = new Once<ContextMenu>() {
+        @Override
+        protected ContextMenu get() throws Exception {
+            ContextMenu menu = new ContextMenu();
+            ObservableList<MenuItem> items = menu.getItems();
+            MenuItem menuItem;
+
+            // 修改
+            menuItem = new MenuItem(Singleton.of(ResourceBundle.class).getString("rmt.tree.log.context.menu.edit"));
+            menuItem.setOnAction(evt -> {
+                // 重新取值
+                TreeItem node = (TreeItem) areas.getSelectionModel().getSelectedItem();
+                OutContent<Server> server = new OutContent<>();
+                OutContent<LogPath> log = new OutContent<>();
+                findValue(node, server, log);
+
+                createEditDialog(server.value(), log.value());
+            });
+            items.add(menuItem);
+
+            // 刪除
+            menuItem = new MenuItem(Singleton.of(ResourceBundle.class).getString("rmt.tree.log.context.menu.delete"));
+            menuItem.setOnAction(evt -> {
+                // 重新取值
+                TreeItem node = (TreeItem) areas.getSelectionModel().getSelectedItem();
+                OutContent<Server> server = new OutContent<>();
+                OutContent<LogPath> log = new OutContent<>();
+                findValue(node, server, log);
+
+                Alert alert = new Alert(
+                        Alert.AlertType.CONFIRMATION,
+                        String.format(Singleton.of(ResourceBundle.class).getString("rmt.dialog.delete.log"), log.value()),
+                        ButtonType.YES, ButtonType.NO
+                );
+
+                // 更新外觀
+                App.changeTheme(alert.getDialogPane().getStylesheets(), Singleton.of(DataWrapper.class).getPreference().getTheme());
+
+                Optional<ButtonType> result = alert.showAndWait();
+
+                if (result.isPresent() && result.get() == ButtonType.YES) {
+                    // 移除資料
+                    server.value().getLogPaths().remove(log.value());
+                    // 移除顯示
+                    node.getParent().getChildren().remove(node);
+                }
+            });
+            items.add(menuItem);
+            return menu;
+        }
+    };
 
     boolean tailing = true;
 
     /**
      * 初始化
-     *
-     * @param wrapper
      */
-    public void load(DataWrapper wrapper) {
+    public void load() {
+        DataWrapper wrapper = Singleton.of(DataWrapper.class);
+
         // 載入設定
         TreeItem<Object> root = new TreeItem<>();
         //noinspection unchecked
@@ -107,7 +218,7 @@ public class MainController {
                     serverValue.setExpanded(newValue);
                 });
 
-                final ObservableList<TreeItem<Object>> serverChildren = treeItem.getChildren();
+                ObservableList<TreeItem<Object>> serverChildren = treeItem.getChildren();
 
                 // 處理 log 路徑設定
                 for (LogPath logPath : server.getLogPaths()) {
@@ -117,14 +228,14 @@ public class MainController {
             }
         }
 
-        // 註冊點選 log 事件
+        // 點選 log 事件
         areas.addEventFilter(MouseEvent.MOUSE_CLICKED, event -> {
             if (event.getButton() == MouseButton.PRIMARY) {
                 // 顯示 log
                 connectLogFile(event);
             } else if (event.getButton() == MouseButton.SECONDARY) {
                 // 顯示選單
-                showMenu(event);
+                showTreeContextMenu(event);
             }
         });
 
@@ -182,9 +293,9 @@ public class MainController {
     }
 
     /**
-     * 更新 disconnect 狀態
+     * 更新功能 disconnect 狀態
      *
-     * @param item
+     * @param item 目前選擇的節點
      */
     void flushDisconnectStatus(TreeItem item) {
         OutContent<Server> server = new OutContent<>();
@@ -194,128 +305,51 @@ public class MainController {
     }
 
     /**
-     * 顯示 node 的右鍵選單
+     * 顯示 {@link TreeItem} 的右鍵選單
      *
-     * @param event
+     * @param event 點選事件
      */
-    void showMenu(MouseEvent event) {
+    void showTreeContextMenu(MouseEvent event) {
         TreeItem selectedItem = (TreeItem) areas.getSelectionModel().getSelectedItem();
         if (selectedItem == null) return;
         Object value = selectedItem.getValue();
         if (value instanceof Server) {
-            if (serverMenu != null) serverMenu.hide();
-            if (logMenu != null) logMenu.hide();
-            if (serverMenu == null) {
-                serverMenu = new ContextMenu();
-                ObservableList<MenuItem> items = serverMenu.getItems();
-                MenuItem menuItem;
-
-                // 新增 log
-                menuItem = new MenuItem(Singleton.of(ResourceBundle.class).getString("rmt.tree.server.context.menu.add.log"));
-                menuItem.setOnAction(this::addLogClick);
-                items.add(menuItem);
-
-                // 修改
-                menuItem = new MenuItem(Singleton.of(ResourceBundle.class).getString("rmt.tree.server.context.menu.edit"));
-                menuItem.setOnAction(evt -> {
-                    // 重新取值
-                    TreeItem node = (TreeItem) areas.getSelectionModel().getSelectedItem();
-                    Server server = (Server) node.getValue();
-
-                    createEditDialog(server);
-                });
-                items.add(menuItem);
-
-                // 刪除
-                menuItem = new MenuItem(Singleton.of(ResourceBundle.class).getString("rmt.tree.server.context.menu.delete"));
-                menuItem.setOnAction(evt -> {
-                    // 重新取值
-                    TreeItem node = (TreeItem) areas.getSelectionModel().getSelectedItem();
-                    OutContent<Server> server = new OutContent<>();
-                    OutContent<LogPath> log = new OutContent<>();
-                    findValue(node, server, log);
-
-                    Alert alert = new Alert(
-                            Alert.AlertType.CONFIRMATION,
-                            String.format(Singleton.of(ResourceBundle.class).getString("rmt.dialog.delete.server"), server),
-                            ButtonType.YES, ButtonType.NO
-                    );
-
-                    // 更新外觀
-                    App.changeTheme(alert.getDialogPane().getStylesheets(), Singleton.of(DataWrapper.class).getPreference().getTheme());
-
-                    Optional<ButtonType> result = alert.showAndWait();
-
-                    if (result.isPresent() && result.get() == ButtonType.YES) {
-                        // 移除資料
-                        Singleton.of(DataWrapper.class).getServers().remove(server.value());
-                        // 移除顯示
-                        node.getParent().getChildren().remove(node);
-                    }
-                });
-                items.add(menuItem);
-            }
-
-            serverMenu.show(areas, event.getScreenX(), event.getScreenY());
+            showServerContextMenu(event);
         } else if (value instanceof LogPath) {
-            if (serverMenu != null) serverMenu.hide();
-            if (logMenu != null) logMenu.hide();
-            if (logMenu == null) {
-                logMenu = new ContextMenu();
-                ObservableList<MenuItem> items = logMenu.getItems();
-                MenuItem menuItem;
-
-                // 修改
-                menuItem = new MenuItem(Singleton.of(ResourceBundle.class).getString("rmt.tree.log.context.menu.edit"));
-                menuItem.setOnAction(evt -> {
-                    // 重新取值
-                    TreeItem node = (TreeItem) areas.getSelectionModel().getSelectedItem();
-                    OutContent<Server> server = new OutContent<>();
-                    OutContent<LogPath> log = new OutContent<>();
-                    findValue(node, server, log);
-
-                    createEditDialog(server.value(), log.value());
-                });
-                items.add(menuItem);
-
-                // 刪除
-                menuItem = new MenuItem(Singleton.of(ResourceBundle.class).getString("rmt.tree.log.context.menu.delete"));
-                menuItem.setOnAction(evt -> {
-                    // 重新取值
-                    TreeItem node = (TreeItem) areas.getSelectionModel().getSelectedItem();
-                    OutContent<Server> server = new OutContent<>();
-                    OutContent<LogPath> log = new OutContent<>();
-                    findValue(node, server, log);
-
-                    Alert alert = new Alert(
-                            Alert.AlertType.CONFIRMATION,
-                            String.format(Singleton.of(ResourceBundle.class).getString("rmt.dialog.delete.log"), log.value()),
-                            ButtonType.YES, ButtonType.NO
-                    );
-
-                    // 更新外觀
-                    App.changeTheme(alert.getDialogPane().getStylesheets(), Singleton.of(DataWrapper.class).getPreference().getTheme());
-
-                    Optional<ButtonType> result = alert.showAndWait();
-
-                    if (result.isPresent() && result.get() == ButtonType.YES) {
-                        // 移除資料
-                        server.value().getLogPaths().remove(log.value());
-                        // 移除顯示
-                        node.getParent().getChildren().remove(node);
-                    }
-                });
-                items.add(menuItem);
-            }
-
-            logMenu.show(areas, event.getScreenX(), event.getScreenY());
+            showLogPathContextMenu(event);
         }
+    }
+
+    /**
+     * 顯示 {@link Server} 的右鍵選單
+     *
+     * @param event 點選事件
+     */
+    void showServerContextMenu(MouseEvent event) {
+        // 隱藏所有選單
+        if (serverMenu.present()) serverMenu.value().hide();
+        if (logMenu.present()) logMenu.value().hide();
+
+        serverMenu.value().show(areas, event.getScreenX(), event.getScreenY());
+    }
+
+    /**
+     * 顯示 {@link LogPath} 的右鍵選單
+     *
+     * @param event 點選事件
+     */
+    void showLogPathContextMenu(MouseEvent event) {
+        // 隱藏所有選單
+        if (serverMenu.present()) serverMenu.value().hide();
+        if (logMenu.present()) logMenu.value().hide();
+
+        logMenu.value().show(areas, event.getScreenX(), event.getScreenY());
     }
 
     /**
      * 顯示 {@link Server} 編輯視窗
      *
-     * @param server
+     * @param server {@link Server} 資料內容
      * @return
      */
     Dialog<Server> createEditDialog(Server server) {
@@ -326,6 +360,7 @@ public class MainController {
         VBox content;
 
         try {
+            // 載入 UI 設計
             FXMLLoader loader = new FXMLLoader(getClass().getResource(LAYOUT_SERVER_EDITOR), Singleton.of(ResourceBundle.class));
             content = loader.load();
             controller = loader.getController();
@@ -336,23 +371,26 @@ public class MainController {
         // 更新外觀
         App.changeTheme(dialog.getDialogPane().getStylesheets(), Singleton.of(DataWrapper.class).getPreference().getTheme());
 
+        // 設定顯示介面
         dialog.getDialogPane().setContent(content);
+        // 載入設定
         controller.from(server);
 
         dialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
 
         dialog.setResultConverter(param -> {
             if (param == ButtonType.OK && controller.update(server)) {
-                Logs.debug("Server 設定 %s 已更新", server);
+                App.info(Singleton.of(ResourceBundle.class).getString("rmt.status.info.server.updated"), server);
+                Logs.info("Server 設定 %s 已更新", server);
                 return server;
             }
-            // todo 狀態錯誤
             return null;
         });
 
         controller.focus();
         Optional<Server> result = dialog.showAndWait();
 
+        // 更新畫面與資料
         if (result.isPresent() && !Cube.from(Singleton.of(DataWrapper.class).getServers()).has(result.get())) {
             Singleton.of(DataWrapper.class).getServers().add(server);
 
@@ -371,8 +409,8 @@ public class MainController {
     /**
      * 顯示 {@link LogPath} 編輯視窗
      *
-     * @param server
-     * @param path
+     * @param server {@link Server} 資料內容
+     * @param path   {@link LogPath} 資料內容
      * @return
      */
     Dialog<LogPath> createEditDialog(Server server, LogPath path) {
@@ -383,6 +421,7 @@ public class MainController {
         HBox content;
 
         try {
+            // 載入 UI 設計
             FXMLLoader loader = new FXMLLoader(getClass().getResource(LAYOUT_LOG_EDITOR), Singleton.of(ResourceBundle.class));
             content = loader.load();
             controller = loader.getController();
@@ -393,23 +432,26 @@ public class MainController {
         // 更新外觀
         App.changeTheme(dialog.getDialogPane().getStylesheets(), Singleton.of(DataWrapper.class).getPreference().getTheme());
 
+        // 設定顯示介面
         dialog.getDialogPane().setContent(content);
+        // 載入設定
         controller.from(path);
 
         dialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
 
         dialog.setResultConverter(param -> {
             if (param == ButtonType.OK && controller.update(path)) {
+                App.info(Singleton.of(ResourceBundle.class).getString("rmt.status.info.log.path.updated"));
                 Logs.debug("Log 路徑 %s 已更新", path);
                 return path;
             }
-            // todo 顯示狀態錯誤
             return null;
         });
 
         controller.focus();
         Optional<LogPath> result = dialog.showAndWait();
 
+        // 更新畫面及資料
         if (result.isPresent() && !server.getLogPaths().contains(path)) {
             server.getLogPaths().add(path);
 
@@ -437,7 +479,7 @@ public class MainController {
     /**
      * 顯示檔案內容
      *
-     * @param event
+     * @param event 點選事件
      */
     void connectLogFile(MouseEvent event) {
         // 關閉搜尋
@@ -450,7 +492,7 @@ public class MainController {
 
         if (contents.getItems() instanceof RemoteLogReaderList) {
             /** 若不是同一個檔案時，先清空畫面 **/
-            // 取得現在檔案
+            // 取得目前的選擇項目
             TreeItem item = (TreeItem) areas.getSelectionModel().getSelectedItem();
             OutContent<Server> server = new OutContent<>();
             OutContent<LogPath> log = new OutContent<>();
@@ -458,7 +500,7 @@ public class MainController {
 
             RemoteSourceReaderList list = (RemoteSourceReaderList) contents.getItems();
             if (list.getServer().equals(server.value()) && list.getPath().equals(log.value())) {
-                // 同一檔不再讀取
+                // 同一檔不再次讀取
                 return;
             } else {
                 // 不同檔時清除畫面
@@ -468,17 +510,21 @@ public class MainController {
         }
 
         new Thread(() -> {
+            // 取得目前的選擇項目
             TreeItem item = (TreeItem) areas.getSelectionModel().getSelectedItem();
             OutContent<Server> server = new OutContent<>();
             OutContent<LogPath> log = new OutContent<>();
             findValue(item, server, log);
             if (!log.present()) return;
 
+            // 連線
             synchronized (server.value()) {
                 if (!server.value().isConnected()) server.value().connect();
             }
 
             RemoteLogReaderList list = new RemoteLogReaderList(server.value(), log.value());
+
+            // 利用 InvalidationListener 由 RemoteLogReaderList 更新畫面
             list.addListener((Observable observable) -> {
                 Platform.runLater(() -> {
                     // 更新畫面
@@ -486,6 +532,8 @@ public class MainController {
                     contents.refresh();
                 });
             });
+
+            // 更新資料與畫面
             Platform.runLater(() -> {
                 try {
                     //noinspection unchecked
@@ -507,9 +555,9 @@ public class MainController {
     /**
      * 取得目前選擇的節點資料
      *
-     * @param item
-     * @param server
-     * @param log
+     * @param item   節點
+     * @param server 要取得的 {@link Server} 資料
+     * @param log    要取得的 {@link LogPath} 資料
      */
     void findValue(TreeItem item, OutContent<Server> server, OutContent<LogPath> log) {
         if (item == null) return;
@@ -529,9 +577,9 @@ public class MainController {
     }
 
     /**
-     * 取得 icon
+     * 取得指定位置的圖片並轉為 {@link ImageView}
      *
-     * @param path
+     * @param path 圖片位置
      * @return
      */
     Node getIcon(String path) {
@@ -539,9 +587,9 @@ public class MainController {
     }
 
     /**
-     * 新增 Server node
+     * 新增 {@link Server} node
      *
-     * @param event
+     * @param event 事件
      */
     @FXML
     void addServerClick(Event event) {
@@ -549,12 +597,13 @@ public class MainController {
     }
 
     /**
-     * 新增 Log node
+     * 新增 {@link LogPath} node
      *
      * @param event
      */
     @FXML
     void addLogClick(Event event) {
+        // 取得目前的選擇項目
         TreeItem item = (TreeItem) areas.getSelectionModel().getSelectedItem();
         OutContent<Server> server = new OutContent<>();
         OutContent<LogPath> log = new OutContent<>();
@@ -578,9 +627,12 @@ public class MainController {
             return;
         }
 
-        Logs.trace("開始追蹤檔尾");
         setTailing(true);
+
         new Thread(() -> {
+            App.info(Singleton.of(ResourceBundle.class).getString("rmt.status.info.tailing.start"));
+            Logs.debug("開始追蹤檔尾");
+
             while (tailing && !App.STOP_ALL_TASK) {
                 try {
                     Thread.sleep(1000);
@@ -600,13 +652,15 @@ public class MainController {
                     if (ints.length > 0) contents.getSelectionModel().selectIndices(ints[0], ints);
                 });
             }
+
+            App.info(Singleton.of(ResourceBundle.class).getString("rmt.status.info.tailing.stop"));
         }).start();
     }
 
     /**
      * 個人偏好
      *
-     * @param event
+     * @param event 事件
      */
     @FXML
     void preferenceClick(Event event) {
@@ -618,6 +672,7 @@ public class MainController {
         VBox content;
 
         try {
+            // 載入 UI 設計
             FXMLLoader loader = new FXMLLoader(getClass().getResource(LAYOUT_PREFERENCE_EDITOR), Singleton.of(ResourceBundle.class));
             content = loader.load();
             controller = loader.getController();
@@ -628,17 +683,19 @@ public class MainController {
         // 更新外觀
         App.changeTheme(dialog.getDialogPane().getStylesheets(), Singleton.of(DataWrapper.class).getPreference().getTheme());
 
+        // 設定顯示介面
         dialog.getDialogPane().setContent(content);
+        // 載入設定
         controller.from(preference);
 
         dialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
 
         dialog.setResultConverter(param -> {
             if (param == ButtonType.OK && controller.update(preference)) {
-                Logs.debug("Server 設定 %s 已更新", preference);
+                App.info(Singleton.of(ResourceBundle.class).getString("rmt.status.info.preference.updated"));
+                Logs.debug("偏好設定已更新");
                 return preference;
             }
-            // todo 狀態錯誤
             return null;
         });
 
@@ -649,10 +706,11 @@ public class MainController {
     /**
      * 中斷連線
      *
-     * @param event
+     * @param event 事件
      */
     @FXML
     void disconnectClick(Event event) {
+        // 取得目前的選擇項目
         TreeItem item = (TreeItem) areas.getSelectionModel().getSelectedItem();
         OutContent<Server> server = new OutContent<>();
         OutContent<LogPath> log = new OutContent<>();
@@ -671,7 +729,7 @@ public class MainController {
     /**
      * 複製文字
      *
-     * @param event
+     * @param event 事件
      */
     @FXML
     void hotKeyTyped(KeyEvent event) {
@@ -688,20 +746,19 @@ public class MainController {
                 content.putString(Delimiters.with(String.format("%n")).join(logs).toString());
 
                 systemClipboard.setContent(content);
+                App.info(Singleton.of(ResourceBundle.class).getString("rmt.status.info.selected.content.copied"));
             }
         }
         // 搜尋
         if ("f".equalsIgnoreCase(event.getCharacter()) && (event.isMetaDown() || event.isControlDown())) {
-            // 檢查顯示狀態
-            {
-                TreeItem item = (TreeItem) areas.getSelectionModel().getSelectedItem();
-                if (item == null) return;
-                OutContent<Server> server = new OutContent<>();
-                OutContent<LogPath> log = new OutContent<>();
-                findValue(item, server, log);
-                if (!server.present() || !log.present()) return;
-                if (!server.value().isConnected()) return;
-            }
+            // 取得目前的選擇項目
+            TreeItem item = (TreeItem) areas.getSelectionModel().getSelectedItem();
+            if (item == null) return;
+            OutContent<Server> server = new OutContent<>();
+            OutContent<LogPath> log = new OutContent<>();
+            findValue(item, server, log);
+            if (!server.present() || !log.present()) return;
+            if (!server.value().isConnected()) return;
 
             searchText.setText("");
             searchBar.setManaged(true);
@@ -720,6 +777,7 @@ public class MainController {
     void jumpToLine() {
         // 檢查顯示狀態
         {
+            // 取得目前顯示檔案
             TreeItem item = (TreeItem) areas.getSelectionModel().getSelectedItem();
             if (item == null) return;
             OutContent<Server> server = new OutContent<>();
@@ -740,6 +798,7 @@ public class MainController {
         HBox content;
 
         try {
+            // 載入 UI 設計
             FXMLLoader loader = new FXMLLoader(getClass().getResource(LAYOUT_GO_TO_EDITOR), Singleton.of(ResourceBundle.class));
             content = loader.load();
             controller = loader.getController();
@@ -750,11 +809,13 @@ public class MainController {
         // 更新外觀
         App.changeTheme(dialog.getDialogPane().getStylesheets(), Singleton.of(DataWrapper.class).getPreference().getTheme());
 
+        // 設定顯示介面
         dialog.getDialogPane().setContent(content);
         dialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
 
         dialog.setResultConverter(param -> {
-            if (param == ButtonType.OK && controller.selectedLineNumber() != null) {
+            Integer lineNumber = controller.selectedLineNumber();
+            if (param == ButtonType.OK && lineNumber != null && lineNumber > 0) {
                 Platform.runLater(() -> {
                     // 取得目前顯示檔案
                     TreeItem item = (TreeItem) areas.getSelectionModel().getSelectedItem();
@@ -764,14 +825,12 @@ public class MainController {
                     if (!server.present() || !log.present()) return;
                     if (!server.value().isConnected()) return;
 
-                    Integer index = controller.selectedLineNumber();
-                    String line = log.value().atLine(index);
+                    String line = log.value().atLine(lineNumber);
 
                     //noinspection unchecked
-                    contents.scrollTo(new Line(index, line, log.value().hasLine(index)));
-                    Logs.debug("跳至第 %s 行", index);
+                    contents.scrollTo(new Line(lineNumber, line));
+                    Logs.debug("跳至第 %s 行", lineNumber);
                 });
-                return null;
             }
             return null;
         });
@@ -783,23 +842,26 @@ public class MainController {
     /**
      * 設定追蹤檔尾
      *
-     * @param tailing
+     * @param tailing 開啟或關閉
      */
     void setTailing(boolean tailing) {
+        // 搜尋時不開啟 tailing
         if (contents.getItems() instanceof FilteredLogReaderList) tailing = false;
 
         this.tailing = tailing;
+        // 更新 tail 功能狀態
         tail.setDisable(!tailing);
     }
 
     /**
      * 隱藏 search bar
      *
-     * @param event
+     * @param event 事件
      */
     @FXML
     void searchTrigger(KeyEvent event) {
         if (event.getCode() == KeyCode.ESCAPE) {
+            // 關閉 search
             searchText.setText("");
             searchBar.setManaged(false);
             searchBar.setVisible(false);
@@ -807,6 +869,7 @@ public class MainController {
             // 顯示完整內容
             connectLogFile(null);
         } else if (event.getCode() == KeyCode.ENTER) {
+            // 開始搜尋
             searchClick(null);
         }
     }
@@ -814,7 +877,7 @@ public class MainController {
     /**
      * 執行搜尋
      *
-     * @param actionEvent
+     * @param actionEvent 事件
      */
     @FXML
     void searchClick(ActionEvent actionEvent) {
@@ -825,6 +888,7 @@ public class MainController {
         setTailing(false);
 
         new Thread(() -> {
+            // 取得目前顯示檔案
             TreeItem item = (TreeItem) areas.getSelectionModel().getSelectedItem();
             OutContent<Server> server = new OutContent<>();
             OutContent<LogPath> log = new OutContent<>();
@@ -855,6 +919,11 @@ public class MainController {
         }).start();
     }
 
+    /**
+     * 編輯顯著標示設定
+     *
+     * @param event 事件
+     */
     @FXML
     void highLightClick(Event event) {
         // 開啟 high light 設定
@@ -865,6 +934,7 @@ public class MainController {
         VBox content;
 
         try {
+            // 載入 UI 設計
             FXMLLoader loader = new FXMLLoader(getClass().getResource(LAYOUT_HIGH_LIGHT_EDITOR), Singleton.of(ResourceBundle.class));
             content = loader.load();
             controller = loader.getController();
@@ -876,6 +946,7 @@ public class MainController {
         // 更新外觀
         App.changeTheme(dialog.getDialogPane().getStylesheets(), Singleton.of(DataWrapper.class).getPreference().getTheme());
 
+        // 設定顯示介面
         dialog.getDialogPane().setContent(content);
         dialog.getDialogPane().getButtonTypes().addAll(ButtonType.CLOSE);
 
@@ -883,11 +954,21 @@ public class MainController {
         dialog.show();
     }
 
+    /**
+     * 顯示狀態文字
+     *
+     * @param message 內容
+     */
     public void error(String message) {
         status.setText(message);
         status.setGraphic(getIcon(ICON_ERROR));
     }
 
+    /**
+     * 顯示狀態文字
+     *
+     * @param message 內容
+     */
     public void info(String message) {
         status.setText(message);
         status.setGraphic(null);

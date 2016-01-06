@@ -39,7 +39,7 @@ public class App extends Application {
     final public static String APP_ICON = "/com/prhythm/app/remotetail/icons/app_icon.png";
 
     final public static String STYLE_DARK_APP = "/com/prhythm/app/remotetail/style/dark-theme.css";
-    final public static String STYLE_SPLIT_PANE_DIVIDER = "/com/prhythm/app/remotetail/style/divider.css";
+    final public static String STYLE_DEFAULT = "/com/prhythm/app/remotetail/style/default.css";
 
     final static String CONFIG_FILE = "app.xml";
     final static double MIN_WIDTH = 400;
@@ -48,8 +48,8 @@ public class App extends Application {
     /**
      * 變更外觀
      *
-     * @param styleSheets
-     * @param theme
+     * @param styleSheets 樣式表
+     * @param theme       外觀設定
      */
     public static void changeTheme(ObservableList<String> styleSheets, Preference.Theme theme) {
         switch (theme) {
@@ -62,6 +62,12 @@ public class App extends Application {
         }
     }
 
+    /**
+     * 顯示狀態文字
+     *
+     * @param message 訊息格式
+     * @param args    參數
+     */
     public static void error(String message, Object... args) {
         Platform.runLater(() -> {
             MainController controller = Singleton.of(FXMLLoader.class).getController();
@@ -69,6 +75,12 @@ public class App extends Application {
         });
     }
 
+    /**
+     * 顯示狀態文字
+     *
+     * @param message 訊息格式
+     * @param args    參數
+     */
     public static void info(String message, Object... args) {
         Platform.runLater(() -> {
             MainController controller = Singleton.of(FXMLLoader.class).getController();
@@ -80,7 +92,7 @@ public class App extends Application {
         // 不處理 host key
         JSch.setConfig("StrictHostKeyChecking", "no");
 
-        // logs
+        // 設定 JSCH 的 logs
         JSch.setLogger(new Logger() {
             @Override
             public boolean isEnabled(int level) {
@@ -109,7 +121,7 @@ public class App extends Application {
             }
         });
 
-        // log
+        // 設定 log
         new Logs().setLogFactory(new LogFactory(new GenericLogger(Level.Trace)));
 
         // i18n
@@ -128,6 +140,7 @@ public class App extends Application {
     public void start(Stage stage) throws IOException {
         // 暫存資料
         Singleton.of(stage);
+        // 載入 UI 設計
         FXMLLoader loader = Singleton.of(new FXMLLoader(
                 getClass().getResource(MainController.LAYOUT_MAIN),
                 Singleton.of(ResourceBundle.class)
@@ -135,9 +148,8 @@ public class App extends Application {
 
         // 設定預設屬性
         Scene scene = Singleton.of(new Scene(loader.load(), MIN_WIDTH * 2, MIN_HEIGHT * 2));
-        // divider style
-        scene.getStylesheets().add(STYLE_SPLIT_PANE_DIVIDER);
-        stage.setTitle("Remote Tail - via SSH");
+        scene.getStylesheets().add(STYLE_DEFAULT);
+        stage.setTitle(Singleton.of(ResourceBundle.class).getString("rmt.title"));
         stage.setScene(scene);
         stage.setMinWidth(MIN_WIDTH);
         stage.setMinHeight(MIN_HEIGHT);
@@ -153,6 +165,7 @@ public class App extends Application {
             // 結束連線
             wrapper.getServers().forEach(Server::disconnect);
 
+            // 儲存目前視窗屬性
             wrapper.getWindow().setWidth(stage.getWidth());
             wrapper.getWindow().setHeight(stage.getHeight());
 
@@ -172,7 +185,7 @@ public class App extends Application {
             initialize(stage);
         } catch (JAXBException e) {
             Logs.error("初始化資料失敗: %s", e);
-            App.error("初始化資料失敗: %s", e);
+            App.error(Singleton.of(ResourceBundle.class).getString("rmt.status.error.load.config.failed"), e);
         }
 
         // 顯示
@@ -206,7 +219,7 @@ public class App extends Application {
 
         // 取得 controller
         MainController controller = Singleton.of(FXMLLoader.class).getController();
-        controller.load(wrapper);
+        controller.load();
     }
 
 }

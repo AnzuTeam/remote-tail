@@ -1,6 +1,7 @@
 package com.prhythm.app.remotetail.data;
 
 import com.jcraft.jsch.ChannelExec;
+import com.prhythm.app.remotetail.App;
 import com.prhythm.app.remotetail.models.DataWrapper;
 import com.prhythm.app.remotetail.models.LogPath;
 import com.prhythm.app.remotetail.models.Server;
@@ -13,6 +14,7 @@ import com.prhythm.core.generic.util.Streams;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.ResourceBundle;
 
 /**
  * 搜尋清單
@@ -20,8 +22,14 @@ import java.util.List;
  */
 public class FilteredLogReaderList extends RemoteSourceReaderList {
 
+    /**
+     * 搜尋字串
+     */
     String pattern;
 
+    /**
+     * 符合搜尋的結果行
+     */
     final Once<List<Integer>> linesMatched = new Once<List<Integer>>() {
         @Override
         protected List<Integer> get() throws Exception {
@@ -44,6 +52,10 @@ public class FilteredLogReaderList extends RemoteSourceReaderList {
             result.addAll(values);
 
             exec.disconnect();
+
+            if (result.size() == 0) {
+                App.info(Singleton.of(ResourceBundle.class).getString("rmt.status.info.empty.search.result"), pattern);
+            }
 
             return result;
         }
@@ -68,10 +80,10 @@ public class FilteredLogReaderList extends RemoteSourceReaderList {
         int index = linesMatched.value().get(i);
 
         if (path.hasLine(index)) {
-            return new Line(index, path.atLine(index), true);
+            return new Line(index, path.atLine(index));
         } else {
             linesToRead.add(index);
-            Line line = new Line(index, null, false);
+            Line line = new Line(index, null);
             // 加入觀察者，以更新內容
             addObserver(line);
             return line;

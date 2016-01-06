@@ -60,10 +60,10 @@ public class RemoteLogReaderList extends RemoteSourceReaderList {
         index = index + 1;
 
         if (path.hasLine(index)) {
-            return new Line(index, path.atLine(index), true);
+            return new Line(index, path.atLine(index));
         } else {
             linesToRead.add(index);
-            Line line = new Line(index, null, false);
+            Line line = new Line(index, null);
             // 加入觀察者，以更新內容
             addObserver(line);
             return line;

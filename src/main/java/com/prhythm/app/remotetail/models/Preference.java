@@ -38,6 +38,8 @@ public class Preference {
         this.theme = Theme.White;
     }
 
+    // getter & setter
+
     public double getFontSize() {
         return fontSize;
     }

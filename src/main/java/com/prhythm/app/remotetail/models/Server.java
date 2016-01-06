@@ -5,6 +5,7 @@ import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.Session;
 import com.prhythm.app.remotetail.App;
+import com.prhythm.core.generic.data.Singleton;
 import com.prhythm.core.generic.exception.RecessiveException;
 import com.prhythm.core.generic.logging.Logs;
 import com.prhythm.core.generic.util.Cube;
@@ -15,6 +16,7 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlElementWrapper;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.ResourceBundle;
 
 /**
  * 主機
@@ -91,12 +93,12 @@ public class Server {
      */
     public void connect() {
         try {
-            App.info("Connecting to %s port %d", host, port);
+            App.info(Singleton.of(ResourceBundle.class).getString("rmt.status.info.connect.to.server"), host, port);
             JSch jsch = new JSch();
             session = jsch.getSession(account, host, port);
             session.setPassword(password);
             session.connect();
-            App.info("%s connected", this);
+            App.info(Singleton.of(ResourceBundle.class).getString("rmt.status.info.server.connected"), this);
         } catch (Exception e) {
             throw new RecessiveException(e.getMessage(), e);
         }
@@ -107,10 +109,10 @@ public class Server {
      */
     public void disconnect() {
         if (session != null && session.isConnected()) {
-            App.info("Disconnecting %n", this);
+            App.info(Singleton.of(ResourceBundle.class).getString("rmt.status.info.disconnect.server"), this);
             Logs.info("Disconnecting %n", this);
             session.disconnect();
-            App.info("%n disconnected", this);
+            App.info(Singleton.of(ResourceBundle.class).getString("rmt.status.info.server.disconnected"), this);
 
             // clear temp log
             Cube.from(logPaths).each((item, index) -> {

@@ -28,18 +28,39 @@ public class LogPath {
         this.path = path;
     }
 
+    /**
+     * 資料行是否存在
+     *
+     * @param index 行號
+     * @return
+     */
     public boolean hasLine(int index) {
         return lines.containsKey(index);
     }
 
+    /**
+     * 取得資料行
+     *
+     * @param index 行號
+     * @return
+     */
     public String atLine(int index) {
         return lines.get(index);
     }
 
+    /**
+     * 新增暫存的資料行
+     *
+     * @param index   行號
+     * @param content 資料行內容
+     */
     public void addLine(int index, String content) {
         lines.put(index, content);
     }
 
+    /**
+     * 清除暫存的 log 資料
+     */
     public void clearCachedLines() {
         lines = new HashMap<>();
     }

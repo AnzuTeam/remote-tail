@@ -60,12 +60,20 @@ public class DataWrapper {
         this.servers = new ArrayList<>();
     }
 
+    /**
+     * 儲存設定
+     *
+     * @param file 目標檔 app.xml
+     * @throws JAXBException
+     */
     public void save(File file) throws JAXBException {
         JAXBContext context = JAXBContext.newInstance(DataWrapper.class);
         Marshaller marshaller = context.createMarshaller();
         marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);
         marshaller.marshal(this, file);
     }
+
+    // getter & setter
 
     public Window getWindow() {
         return window;

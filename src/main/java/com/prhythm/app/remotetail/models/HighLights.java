@@ -19,8 +19,14 @@ import java.util.regex.Pattern;
 @XmlAccessorType(XmlAccessType.FIELD)
 public class HighLights implements Iterable<HighLight> {
 
+    /**
+     * 搜尋文字是否顯著標示
+     */
     boolean markSearchPattern = true;
 
+    /**
+     * 行的顯著標示設定
+     */
     @XmlElement(name = "highLight")
     Set<HighLight> highLights;
 
@@ -31,7 +37,7 @@ public class HighLights implements Iterable<HighLight> {
     /**
      * 找出符合的 {@link HighLight} 規則
      *
-     * @param text
+     * @param text 文字內容
      * @return
      */
     public HighLight match(final String text) {

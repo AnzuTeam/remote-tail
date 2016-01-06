@@ -21,14 +21,20 @@ import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 /**
- * 來源讀取
+ * 讀取 log 來源的動態 {@link ObservableList}
  * Created by nanashi07 on 16/1/4.
  */
 public abstract class RemoteSourceReaderList extends Observable implements ObservableList<Line>, Runnable {
 
     final protected static long INTERVAL = TimeUnit.SECONDS.toMillis(2);
 
+    /**
+     * 來源的 {@link Server}
+     */
     transient final Server server;
+    /**
+     * 來源的 {@link LogPath}
+     */
     transient final LogPath path;
 
     /**
@@ -37,6 +43,9 @@ public abstract class RemoteSourceReaderList extends Observable implements Obser
     final Set<Integer> linesToRead = Cube.newConcurrentHashSet();
     boolean stopReadTask = false;
 
+    /**
+     * 處理 {@link javafx.scene.control.ListView} 的更新動作
+     */
     transient InvalidationListener invalidationListener;
 
     public RemoteSourceReaderList(Server server, LogPath logPath) {
@@ -123,7 +132,7 @@ public abstract class RemoteSourceReaderList extends Observable implements Obser
                 try {
                     readLines();
                 } catch (Exception e) {
-                    App.error(e.toString());
+                    App.error(Singleton.of(ResourceBundle.class).getString("rmt.status.error.read.line.failed"), e);
                     Logs.error("讀取 log 發生錯誤: %s", e);
                 }
             }
@@ -147,7 +156,7 @@ public abstract class RemoteSourceReaderList extends Observable implements Obser
         // 有資料才處理
         if (linesToRead.isEmpty()) return;
 
-        // 取得連續的行號
+        // 取得連續的行號(以 sed 指令讀取)
         values = Cube.from(linesToRead).orderBy().takeUntil(new Cube.Predicate<Integer>() {
             int previous;
 
@@ -180,8 +189,8 @@ public abstract class RemoteSourceReaderList extends Observable implements Obser
         ChannelExec channel = server.openChannel("exec");
         // 指令 sed : 顯示指定行的內容
         String cmd = String.format("sed -n %d,%dp %s", min, max, path);
-        Logs.trace("讀取指定行(%s)", cmd);
-        App.info("讀取 %s 由 %d 至 %d", path, min, max);
+        Logs.debug("讀取指定行(%s)", cmd);
+        App.info(Singleton.of(ResourceBundle.class).getString("rmt.status.info.read.log.line"), path, min, max);
         channel.setCommand(cmd);
         InputStream in = channel.getInputStream();
         channel.connect();

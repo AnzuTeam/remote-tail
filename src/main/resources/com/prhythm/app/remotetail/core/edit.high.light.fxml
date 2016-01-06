@@ -7,7 +7,7 @@
       xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1"
       fx:controller="com.prhythm.app.remotetail.core.HighLightEditorController">
     <children>
-        <CheckBox fx:id="searchPattern" prefHeight="27.0" text="High light search pattern"
+        <CheckBox fx:id="searchPattern" prefHeight="27.0" text="%rmt.dialog.high.light.search.pattern"
                   onAction="#searchPatternAction"/>
         <ListView fx:id="rules" prefHeight="200.0">
             <VBox.margin>
@@ -25,25 +25,29 @@
                 <RowConstraints vgrow="SOMETIMES"/>
             </rowConstraints>
             <children>
-                <Button mnemonicParsing="false" prefWidth="90.0" text="Add" GridPane.halignment="CENTER"
+                <Button mnemonicParsing="false" prefWidth="90.0" text="%rmt.dialog.high.light.rule.add"
+                        GridPane.halignment="CENTER"
                         GridPane.hgrow="ALWAYS" GridPane.valignment="CENTER" onAction="#addRule">
                     <GridPane.margin>
                         <Insets right="2.0"/>
                     </GridPane.margin>
                 </Button>
-                <Button mnemonicParsing="false" prefWidth="90.0" text="Delete" GridPane.columnIndex="1"
+                <Button mnemonicParsing="false" prefWidth="90.0" text="%rmt.dialog.high.light.rule.delete"
+                        GridPane.columnIndex="1"
                         GridPane.halignment="CENTER" GridPane.hgrow="ALWAYS" onAction="#removeRule" fx:id="removeItem">
                     <GridPane.margin>
                         <Insets right="2.0"/>
                     </GridPane.margin>
                 </Button>
-                <Button mnemonicParsing="false" prefWidth="90.0" text="Move Up" GridPane.columnIndex="2"
+                <Button mnemonicParsing="false" prefWidth="90.0" text="%rmt.dialog.high.light.rule.move.up"
+                        GridPane.columnIndex="2"
                         GridPane.halignment="CENTER" GridPane.hgrow="ALWAYS" onAction="#moveRuleUp" fx:id="moveUp">
                     <GridPane.margin>
                         <Insets right="2.0"/>
                     </GridPane.margin>
                 </Button>
-                <Button mnemonicParsing="false" prefWidth="90.0" text="Move Down" GridPane.columnIndex="3"
+                <Button mnemonicParsing="false" prefWidth="90.0" text="%rmt.dialog.high.light.rule.move.down"
+                        GridPane.columnIndex="3"
                         GridPane.halignment="CENTER" GridPane.hgrow="ALWAYS" onAction="#moveRuleDown" fx:id="moveDown"/>
             </children>
             <VBox.margin>
@@ -61,13 +65,13 @@
             <children>
                 <VBox>
                     <children>
-                        <Label text="Foreground Color"/>
+                        <Label text="%rmt.dialog.high.light.color.foreground"/>
                         <ColorPicker fx:id="foreground" onAction="#foregroundAction"/>
                     </children>
                 </VBox>
                 <VBox GridPane.columnIndex="1">
                     <children>
-                        <Label text="Background Color"/>
+                        <Label text="%rmt.dialog.high.light.color.background"/>
                         <ColorPicker fx:id="background" onAction="#backgroundAction"/>
                     </children>
                 </VBox>
@@ -96,10 +100,13 @@
                 <RowConstraints vgrow="SOMETIMES"/>
             </rowConstraints>
             <children>
-                <CheckBox fx:id="ignoreCase" mnemonicParsing="false" text="Ignore Case" onAction="#ignoreCaseAction"/>
-                <CheckBox fx:id="bold" mnemonicParsing="false" text="Bold" GridPane.columnIndex="1"
+                <CheckBox fx:id="ignoreCase" mnemonicParsing="false" text="%rmt.dialog.high.light.rule.ignore.case"
+                          onAction="#ignoreCaseAction"/>
+                <CheckBox fx:id="bold" mnemonicParsing="false" text="%rmt.dialog.high.light.rule.bold"
+                          GridPane.columnIndex="1"
                           onAction="#boldAction"/>
-                <CheckBox fx:id="italic" mnemonicParsing="false" text="Italic" GridPane.columnIndex="2"
+                <CheckBox fx:id="italic" mnemonicParsing="false" text="%rmt.dialog.high.light.rule.italic"
+                          GridPane.columnIndex="2"
                           onAction="#italicAction"/>
             </children>
             <VBox.margin>

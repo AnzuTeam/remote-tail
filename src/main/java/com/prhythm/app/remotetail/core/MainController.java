@@ -14,6 +14,7 @@ import com.prhythm.core.generic.logging.Logs;
 import com.prhythm.core.generic.util.Boxings;
 import com.prhythm.core.generic.util.Cube;
 import com.prhythm.core.generic.util.Delimiters;
+import com.sun.javafx.scene.control.skin.VirtualFlow;
 import javafx.application.Platform;
 import javafx.beans.Observable;
 import javafx.beans.property.BooleanProperty;
@@ -187,6 +188,8 @@ public class MainController {
     };
 
     boolean tailing = true;
+
+    Integer fullLogIndex;
 
     /**
      * 初始化
@@ -504,6 +507,7 @@ public class MainController {
                 return;
             } else {
                 // 不同檔時清除畫面
+                fullLogIndex = null;
                 //noinspection unchecked
                 contents.setItems(null);
             }
@@ -539,7 +543,8 @@ public class MainController {
                     //noinspection unchecked
                     contents.setItems(list);
                     // 連接時移至底部
-                    contents.scrollTo(list.size() - 1);
+                    contents.scrollTo(fullLogIndex == null ? list.size() - 1 : fullLogIndex);
+                    fullLogIndex = null;
                 } catch (Exception e) {
                     Logs.warn(RecessiveException.unwrapp(e));
                     //noinspection unchecked
@@ -905,6 +910,10 @@ public class MainController {
             });
             Platform.runLater(() -> {
                 try {
+                    // 取得目前資料的位置
+                    VirtualFlow flow = (VirtualFlow) contents.lookup(".virtual-flow");
+                    fullLogIndex = flow.getFirstVisibleCell().getIndex();
+
                     //noinspection unchecked
                     contents.setItems(list);
                     // 連接時移至底部

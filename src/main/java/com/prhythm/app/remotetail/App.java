@@ -130,7 +130,7 @@ public class App extends Application {
         // 未處理錯誤
         Thread.setDefaultUncaughtExceptionHandler((t, e) -> {
             Logs.error(RecessiveException.unwrapp(e));
-            App.error(e.getMessage());
+            App.error(Singleton.of(ResourceBundle.class).getString("rmt.status.error.unknown.exception"), e.getMessage());
         });
 
         launch(args);

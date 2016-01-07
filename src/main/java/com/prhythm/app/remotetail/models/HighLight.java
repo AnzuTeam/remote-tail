@@ -69,7 +69,7 @@ public class HighLight {
             if (expression == null) {
                 return expression = Pattern.compile(pattern, isIgnoreCase() ? Pattern.CASE_INSENSITIVE : 0);
             } else {
-                if (pattern.equals(expression.pattern())) {
+                if (pattern.equals(expression.pattern()) && ignoreCase == ((expression.flags() & Pattern.CASE_INSENSITIVE) == Pattern.CASE_INSENSITIVE)) {
                     return expression;
                 } else {
                     return expression = Pattern.compile(pattern, isIgnoreCase() ? Pattern.CASE_INSENSITIVE : 0);

@@ -910,9 +910,11 @@ public class MainController {
             });
             Platform.runLater(() -> {
                 try {
-                    // 取得目前資料的位置
-                    VirtualFlow flow = (VirtualFlow) contents.lookup(".virtual-flow");
-                    fullLogIndex = flow.getFirstVisibleCell().getIndex();
+                    if (contents.getItems() instanceof RemoteLogReaderList) {
+                        // 取得目前資料的位置
+                        VirtualFlow flow = (VirtualFlow) contents.lookup(".virtual-flow");
+                        fullLogIndex = flow.getFirstVisibleCell().getIndex();
+                    }
 
                     //noinspection unchecked
                     contents.setItems(list);

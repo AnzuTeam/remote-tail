@@ -15,6 +15,15 @@
     <highLights>
         <markSearchPattern>true</markSearchPattern>
         <highLight>
+            <ignoreCase>true</ignoreCase>
+            <pattern>IN\wO</pattern>
+            <foreground>0x8066ccff</foreground>
+            <background>0xffffffff</background>
+            <bold>true</bold>
+            <italic>false</italic>
+            <order>20</order>
+        </highLight>
+        <highLight>
             <ignoreCase>false</ignoreCase>
             <pattern>ERROR</pattern>
             <foreground>0xcc3333ff</foreground>

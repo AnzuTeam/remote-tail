@@ -22,6 +22,8 @@ import javafx.scene.text.FontWeight;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ResourceBundle;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Log 行
@@ -79,35 +81,44 @@ public class LineListCell extends ListCell<Line> {
             /** 顯示 log 內容 **/
             // 先清除資料
             children.clear();
-            // 取得符合的顯著標示設定
-            HighLight match = highLights.match(item.toString());
-            if (highLights.isMarkSearchPattern() && !Strings.isNullOrWhiteSpace(searchText)) {
-                // 處理搜尋文字的顯著標示
-                String[] values = item.toString().split(searchText);
-                if (match == null) {
-                    for (int i = 0; i < values.length; i++) {
-                        if (i > 0) {
-                            //noinspection ConstantConditions
-                            children.add(createHighLightedSearchPattern(preference, match, searchText));
-                        }
-                        children.add(createStandardText(preference, values[i]));
-                    }
-                } else {
-                    for (int i = 0; i < values.length; i++) {
-                        if (i > 0) {
-                            children.add(createHighLightedSearchPattern(preference, match, searchText));
-                        }
-                        children.add(createHighLightedText(preference, match, values[i]));
-                    }
-                }
+
+            if (item.getContent() == null) {
+                // 未載入時，直接以預設格式顯示
+                children.add(createStandardText(preference, item.toString()));
             } else {
-                Label text;
-                if (match == null) {
-                    text = createStandardText(preference, item.toString());
+                // 取得符合的顯著標示設定
+                HighLight match = highLights.match(item.toString());
+                if (highLights.isMarkSearchPattern() && !Strings.isNullOrWhiteSpace(searchText)) {
+                    // 處理搜尋文字的顯著標示
+                    String[] values = item.toString().split(searchText);
+                    // 取得符合的項目
+                    Matcher matcher = Pattern.compile(searchText).matcher(item.toString());
+                    // 將分割的字串與符合的字串重新組合
+                    if (match == null) {
+                        for (int i = 0; i < values.length; i++) {
+                            if (i > 0 && matcher.find()) {
+                                //noinspection ConstantConditions
+                                children.add(createHighLightedSearchPattern(preference, match, matcher.group()));
+                            }
+                            children.add(createStandardText(preference, values[i]));
+                        }
+                    } else {
+                        for (int i = 0; i < values.length; i++) {
+                            if (i > 0 && matcher.find()) {
+                                children.add(createHighLightedSearchPattern(preference, match, matcher.group()));
+                            }
+                            children.add(createHighLightedText(preference, match, values[i]));
+                        }
+                    }
                 } else {
-                    text = createHighLightedText(preference, match, item.toString());
+                    Label text;
+                    if (match == null) {
+                        text = createStandardText(preference, item.toString());
+                    } else {
+                        text = createHighLightedText(preference, match, item.toString());
+                    }
+                    children.add(text);
                 }
-                children.add(text);
             }
 
             setGraphic(hBox);

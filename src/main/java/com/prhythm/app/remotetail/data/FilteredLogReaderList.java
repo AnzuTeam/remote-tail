@@ -9,6 +9,7 @@ import com.prhythm.core.generic.data.Once;
 import com.prhythm.core.generic.data.Singleton;
 import com.prhythm.core.generic.logging.Logs;
 import com.prhythm.core.generic.util.Cube;
+import com.prhythm.core.generic.util.Delimiters;
 import com.prhythm.core.generic.util.Streams;
 
 import java.io.InputStream;
@@ -38,7 +39,7 @@ public class FilteredLogReaderList extends RemoteSourceReaderList {
             }
             ChannelExec exec = server.openChannel("exec");
             // 指令 wc : 計算檔案行數
-            String cmd = String.format("grep -n %s %s | cut -d : -f1", pattern, path);
+            String cmd = String.format("grep -n %s %s | cut -d : -f1", Delimiters.with("\\\\").join(Delimiters.with("\\").split(pattern)), path);
             Logs.trace("取得符合行行號(%s)", cmd);
             exec.setCommand(cmd);
             InputStream in = exec.getInputStream();

@@ -9,7 +9,6 @@ import com.prhythm.core.generic.data.Once;
 import com.prhythm.core.generic.data.Singleton;
 import com.prhythm.core.generic.logging.Logs;
 import com.prhythm.core.generic.util.Cube;
-import com.prhythm.core.generic.util.Delimiters;
 import com.prhythm.core.generic.util.Streams;
 
 import java.io.InputStream;
@@ -39,7 +38,11 @@ public class FilteredLogReaderList extends RemoteSourceReaderList {
             }
             ChannelExec exec = server.openChannel("exec");
             // 指令 wc : 計算檔案行數
-            String cmd = String.format("grep -n %s %s | cut -d : -f1", Delimiters.with("\\\\").join(Delimiters.with("\\").split(pattern)), path);
+            String cmd = String.format(
+                    "grep -n -e %s '%s' | cut -d : -f1",
+                    escapePattern(pattern),
+                    path
+            );
             Logs.trace("取得符合行行號(%s)", cmd);
             exec.setCommand(cmd);
             InputStream in = exec.getInputStream();
@@ -61,6 +64,35 @@ public class FilteredLogReaderList extends RemoteSourceReaderList {
             return result;
         }
     };
+
+    CharSequence escapePattern(String pattern) {
+        if (pattern == null) return null;
+
+        if (pattern.contains("\"")) {
+            if (pattern.contains("'")) {
+                StringBuilder sb = new StringBuilder();
+                for (char c : pattern.toCharArray()) {
+                    switch (c) {
+                        case '\'':
+                            sb.append('\\');
+                        default:
+                            sb.append(c);
+                            break;
+                    }
+                }
+
+                return String.format("'%s'", sb);
+            } else {
+                return String.format("'%s'", pattern);
+            }
+        } else {
+            if (pattern.contains("'")) {
+                return String.format("\"%s\"", pattern);
+            } else {
+                return String.format("'%s'", pattern);
+            }
+        }
+    }
 
     public FilteredLogReaderList(Server server, LogPath logPath, String pattern) {
         super(server, logPath);
@@ -97,4 +129,13 @@ public class FilteredLogReaderList extends RemoteSourceReaderList {
         return linesMatched.value().indexOf(line.getIndex());
     }
 
+    // getter & setter
+
+    public String getPattern() {
+        return pattern;
+    }
+
+    public void setPattern(String pattern) {
+        this.pattern = pattern;
+    }
 }

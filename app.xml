@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <wrapper>
     <window>
-        <height>587.0</height>
-        <width>935.0</width>
-        <x>366.0</x>
-        <y>103.0</y>
+        <height>873.0</height>
+        <width>1440.0</width>
+        <x>0.0</x>
+        <y>23.0</y>
     </window>
     <preference>
         <fontFamily>Courier New</fontFamily>
@@ -14,15 +14,6 @@
     </preference>
     <highLights>
         <markSearchPattern>true</markSearchPattern>
-        <highLight>
-            <ignoreCase>true</ignoreCase>
-            <pattern>IN\wO</pattern>
-            <foreground>0x8066ccff</foreground>
-            <background>0xffffffff</background>
-            <bold>true</bold>
-            <italic>false</italic>
-            <order>20</order>
-        </highLight>
         <highLight>
             <ignoreCase>false</ignoreCase>
             <pattern>ERROR</pattern>

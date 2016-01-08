@@ -292,7 +292,11 @@ public class MainController {
      * @return
      */
     public String getSearchText() {
-        return searchBar.isVisible() ? searchText.getText().trim() : null;
+        if (searchBar.isVisible() && contents.getItems() instanceof FilteredLogReaderList) {
+            FilteredLogReaderList list = (FilteredLogReaderList) contents.getItems();
+            return list.getPattern();
+        }
+        return null;
     }
 
     /**
@@ -892,7 +896,7 @@ public class MainController {
         // 搜尋時停用追尾
         setTailing(false);
 
-        new Thread(() -> {
+        Thread thread = new Thread(() -> {
             // 取得目前顯示檔案
             TreeItem item = (TreeItem) areas.getSelectionModel().getSelectedItem();
             OutContent<Server> server = new OutContent<>();
@@ -927,7 +931,9 @@ public class MainController {
                 }
                 flushDisconnectStatus(item);
             });
-        }).start();
+        });
+        thread.setPriority(Thread.MIN_PRIORITY);
+        thread.start();
     }
 
     /**

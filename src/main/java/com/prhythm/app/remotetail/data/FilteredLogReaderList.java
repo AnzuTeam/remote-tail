@@ -39,7 +39,7 @@ public class FilteredLogReaderList extends RemoteSourceReaderList {
             ChannelExec exec = server.openChannel("exec");
             // 指令 wc : 計算檔案行數
             String cmd = String.format(
-                    "grep -n -e %s '%s' | cut -d : -f1",
+                    "grep --color=auto -n -e \"%s\" '%s' | cut -d : -f1",
                     escapePattern(pattern),
                     path
             );
@@ -68,30 +68,44 @@ public class FilteredLogReaderList extends RemoteSourceReaderList {
     CharSequence escapePattern(String pattern) {
         if (pattern == null) return null;
 
-        if (pattern.contains("\"")) {
-            if (pattern.contains("'")) {
-                StringBuilder sb = new StringBuilder();
-                for (char c : pattern.toCharArray()) {
-                    switch (c) {
-                        case '\'':
-                            sb.append('\\');
-                        default:
-                            sb.append(c);
-                            break;
-                    }
-                }
+        /** 轉換規則 **/
+        // 1. { ==> \{
+        // 2. } ==> \}
+        // 3. " ==> \"
+        // 4. [x]+ ==> [x]\+
+        // 5. \d ==> [0-9]
 
-                return String.format("'%s'", sb);
-            } else {
-                return String.format("'%s'", pattern);
+        StringBuilder sb = new StringBuilder();
+        char[] chars = pattern.toCharArray();
+        for (int i = 0; i < chars.length; i++) {
+            char c = chars[i];
+
+            // rule 1.
+            if (c == '{') {
+                sb.append('\\');
             }
-        } else {
-            if (pattern.contains("'")) {
-                return String.format("\"%s\"", pattern);
-            } else {
-                return String.format("'%s'", pattern);
+            // rule 2.
+            if (c == '}') {
+                sb.append('\\');
             }
+            // rule 3.
+            if (c == '"') {
+                sb.append('\\');
+            }
+            // rule 4.
+            if (c == '+') {
+                sb.append('\\');
+            }
+            // rule 5.
+            if (c == 'd' && i > 0 && chars[i - 1] == '\\') {
+                sb.deleteCharAt(sb.length() - 1).append("[0-9]");
+                // 不加入原本的 'd'
+                continue;
+            }
+
+            sb.append(c);
         }
+        return sb;
     }
 
     public FilteredLogReaderList(Server server, LogPath logPath, String pattern) {

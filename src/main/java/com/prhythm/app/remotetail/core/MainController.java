@@ -39,6 +39,7 @@ import javafx.stage.WindowEvent;
 import java.io.IOException;
 import java.util.Optional;
 import java.util.ResourceBundle;
+import java.util.regex.PatternSyntaxException;
 
 /**
  * 主介面
@@ -892,6 +893,15 @@ public class MainController {
     void searchClick(ActionEvent actionEvent) {
         if (searchText.getText().trim().isEmpty())
             return;
+
+        // 檢查格式是否正確
+        try {
+            //noinspection ResultOfMethodCallIgnored
+            "".split(searchText.getText().trim());
+        } catch (PatternSyntaxException e) {
+            App.error(Singleton.of(ResourceBundle.class).getString("rmt.status.error.search.pattern.syntax.error"), searchText.getText().trim());
+            return;
+        }
 
         // 搜尋時停用追尾
         setTailing(false);

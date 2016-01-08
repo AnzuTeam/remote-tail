@@ -87,35 +87,80 @@ public class LineListCell extends ListCell<Line> {
                 children.add(createStandardText(preference, item.toString()));
             } else {
                 // 取得符合的顯著標示設定
-                HighLight match = highLights.match(item.toString());
+                HighLight match = highLights.match(item.getContent());
                 if (highLights.isMarkSearchPattern() && !Strings.isNullOrWhiteSpace(searchText)) {
                     // 處理搜尋文字的顯著標示
-                    String[] values = item.toString().split(searchText);
+                    String[] values = item.getContent().split(searchText);
                     // 取得符合的項目
-                    Matcher matcher = Pattern.compile(searchText).matcher(item.toString());
+                    Matcher matcher = Pattern.compile(searchText).matcher(item.getContent());
                     // 將分割的字串與符合的字串重新組合
                     if (match == null) {
-                        for (int i = 0; i < values.length; i++) {
-                            if (i > 0 && matcher.find()) {
-                                //noinspection ConstantConditions
-                                children.add(createHighLightedSearchPattern(preference, match, matcher.group()));
+                        if (values.length == 1) {
+                            // 分割數僅 1 的情況，可能為無相符資料或首尾符合
+                            if (values[0].equals(item.getContent())) {
+                                // 完全相同：未分割
+                                children.add(createStandardText(preference, item.getContent()));
+                            } else {
+                                // 不相同：首分割或尾分割
+                                String value = item.getContent().replace(values[0], "");
+                                if (item.getContent().startsWith(values[0])) {
+                                    // 尾分割
+                                    children.add(createStandardText(preference, values[0]));
+                                    //noinspection ConstantConditions
+                                    children.add(createHighLightedSearchPattern(preference, match, value));
+                                } else {
+                                    // 首分割
+                                    //noinspection ConstantConditions
+                                    children.add(createHighLightedSearchPattern(preference, match, value));
+                                    children.add(createStandardText(preference, values[0]));
+                                }
                             }
-                            children.add(createStandardText(preference, values[i]));
+                        } else {
+                            for (int i = 0; i < values.length; i++) {
+                                if (i > 0 && matcher.find()) {
+                                    //noinspection ConstantConditions
+                                    children.add(createHighLightedSearchPattern(preference, match, matcher.group()));
+                                }
+                                children.add(createStandardText(preference, values[i]));
+                            }
                         }
                     } else {
-                        for (int i = 0; i < values.length; i++) {
-                            if (i > 0 && matcher.find()) {
-                                children.add(createHighLightedSearchPattern(preference, match, matcher.group()));
+                        // 分割數僅 1 的情況，可能為無相符資料或首尾符合
+                        if (values.length == 1) {
+                            // 分割數僅 1 的情況，可能為無相符資料或首尾符合
+                            if (values[0].equals(item.getContent())) {
+                                // 完全相同：未分割
+                                children.add(createStandardText(preference, item.getContent()));
+                            } else {
+                                // 不相同：首分割或尾分割
+                                String value = item.getContent().replace(values[0], "");
+                                if (item.getContent().startsWith(values[0])) {
+                                    // 尾分割
+                                    children.add(createHighLightedText(preference, match, values[0]));
+                                    //noinspection ConstantConditions
+                                    children.add(createHighLightedSearchPattern(preference, match, value));
+                                } else {
+                                    // 首分割
+                                    //noinspection ConstantConditions
+                                    children.add(createHighLightedSearchPattern(preference, match, value));
+                                    children.add(createHighLightedText(preference, match, values[0]));
+                                }
                             }
-                            children.add(createHighLightedText(preference, match, values[i]));
+                        } else {
+                            for (int i = 0; i < values.length; i++) {
+                                if (i > 0 && matcher.find()) {
+                                    children.add(createHighLightedSearchPattern(preference, match, matcher.group()));
+                                }
+                                children.add(createHighLightedText(preference, match, values[i]));
+                            }
                         }
                     }
                 } else {
                     Label text;
                     if (match == null) {
-                        text = createStandardText(preference, item.toString());
+                        text = createStandardText(preference, item.getContent());
                     } else {
-                        text = createHighLightedText(preference, match, item.toString());
+                        text = createHighLightedText(preference, match, item.getContent());
                     }
                     children.add(text);
                 }

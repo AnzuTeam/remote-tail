@@ -743,41 +743,123 @@ public class MainController {
      */
     @FXML
     void hotKeyTyped(KeyEvent event) {
-        // 複制文字
-        if ("c".equalsIgnoreCase(event.getCharacter()) && (event.isMetaDown() || event.isControlDown())) {
-            //noinspection unchecked
-            ObservableList<Line> selectedItems = contents.getSelectionModel().getSelectedItems();
-            if (selectedItems.size() > 0) {
-                Cube<String> logs = Cube.from(selectedItems).select((item, index) -> item.getContent());
-
-                // 複製內容
-                Clipboard systemClipboard = Clipboard.getSystemClipboard();
-                ClipboardContent content = new ClipboardContent();
-                content.putString(Delimiters.with(String.format("%n")).join(logs).toString());
-
-                systemClipboard.setContent(content);
-                App.info(Singleton.of(ResourceBundle.class).getString("rmt.status.info.selected.content.copied"));
-            }
+        // 判斷作業系統
+        String os = System.getProperty("os.name");
+        if (os == null) {
+            os = "mac";
+        } else {
+            os = os.toLowerCase();
+            if (os.contains("mac")) os = "mac";
+            if (os.contains("windows")) os = "windows";
         }
-        // 搜尋
-        if ("f".equalsIgnoreCase(event.getCharacter()) && (event.isMetaDown() || event.isControlDown())) {
-            // 取得目前的選擇項目
-            TreeItem item = (TreeItem) areas.getSelectionModel().getSelectedItem();
-            if (item == null) return;
-            OutContent<Server> server = new OutContent<>();
-            OutContent<LogPath> log = new OutContent<>();
-            findValue(item, server, log);
-            if (!server.present() || !log.present()) return;
-            if (!server.value().isConnected()) return;
 
-            searchText.setText("");
-            searchBar.setManaged(true);
-            searchBar.setVisible(true);
-            Platform.runLater(searchText::requestFocus);
+        // 判斷輔助鍵
+        boolean controlKeyDown = false;
+
+        switch (os) {
+            case "mac":
+                controlKeyDown = event.isMetaDown();
+                break;
+            case "windows":
+                controlKeyDown = event.isControlDown();
+                break;
         }
-        // 到指定行
-        if ("g".equalsIgnoreCase(event.getCharacter()) && (event.isMetaDown() || event.isControlDown())) {
-            jumpToLine();
+
+        if (!controlKeyDown) return;
+
+        // 判斷行為
+        char action = ' ';
+        int keyCode = event.getCharacter().charAt(0);
+
+        // mac key code
+        // c = 99
+        // f = 102
+        // g = 103
+
+        // windows key cod
+        // c = 3
+        // f = 6
+        // g = 7
+
+        switch (os) {
+            case "mac":
+                switch (keyCode) {
+                    case 99:
+                        action = 'c';
+                        break;
+                    case 102:
+                        action = 'f';
+                        break;
+                    case 103:
+                        action = 'g';
+                        break;
+                }
+                break;
+            case "windows":
+                switch (keyCode) {
+                    case 3:
+                        action = 'c';
+                        break;
+                    case 6:
+                        action = 'f';
+                        break;
+                    case 7:
+                        action = 'g';
+                        break;
+                }
+                break;
+        }
+
+        Logs.debug("===============================================");
+        Logs.debug(os);
+        Logs.debug("isAltDown          %b", event.isAltDown());
+        Logs.debug("isControlDown      %b", event.isControlDown());
+        Logs.debug("isMetaDown         %b", event.isMetaDown());
+        Logs.debug("isShiftDown        %b", event.isShiftDown());
+        Logs.debug("isShortcutDown     %b", event.isShortcutDown());
+        Logs.debug("isConsumed         %b", event.isConsumed());
+        Logs.debug("getCharacter       %s", event.getCharacter());
+        Logs.debug("getCharacter2      %s", event.getCharacter().length());
+        Logs.debug("getCharacter3      %s", (int) event.getCharacter().charAt(0));
+        Logs.debug("getCode            %s", event.getCode());
+
+        switch (action) {
+            case 'c':
+                // 複制文字
+                //noinspection unchecked
+                ObservableList<Line> selectedItems = contents.getSelectionModel().getSelectedItems();
+                if (selectedItems.size() > 0) {
+                    Cube<String> logs = Cube.from(selectedItems).select((item, index) -> item.getContent());
+
+                    // 複製內容
+                    Clipboard systemClipboard = Clipboard.getSystemClipboard();
+                    ClipboardContent content = new ClipboardContent();
+                    content.putString(Delimiters.with(String.format("%n")).join(logs).toString());
+
+                    systemClipboard.setContent(content);
+                    App.info(Singleton.of(ResourceBundle.class).getString("rmt.status.info.selected.content.copied"));
+                }
+                break;
+            case 'f':
+                // 搜尋
+                // 取得目前的選擇項目
+                TreeItem item = (TreeItem) areas.getSelectionModel().getSelectedItem();
+                if (item == null) return;
+                OutContent<Server> server = new OutContent<>();
+                OutContent<LogPath> log = new OutContent<>();
+                findValue(item, server, log);
+                if (!server.present() || !log.present()) return;
+                if (!server.value().isConnected()) return;
+
+                searchText.setText("");
+                searchBar.setManaged(true);
+                searchBar.setVisible(true);
+                Platform.runLater(searchText::requestFocus);
+                break;
+            case 'g':
+                // 到指定行
+                jumpToLine();
+                break;
         }
     }
 

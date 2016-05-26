@@ -2,7 +2,9 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/remote-tail.iml" filepath="$PROJECT_DIR$/remote-tail.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/remote-tail.iml" filepath="$PROJECT_DIR$/.idea/modules/remote-tail.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/remote-tail_main.iml" filepath="$PROJECT_DIR$/.idea/modules/remote-tail_main.iml" group="remote-tail" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/remote-tail_test.iml" filepath="$PROJECT_DIR$/.idea/modules/remote-tail_test.iml" group="remote-tail" />
     </modules>
   </component>
 </project>

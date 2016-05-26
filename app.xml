@@ -50,7 +50,7 @@
             <expanded>true</expanded>
             <logs>
                 <logPath>
-                    <path>/home/nanashi07/mylog.log</path>
+                    <path>/home/nanashi07/write.log</path>
                 </logPath>
             </logs>
         </server>

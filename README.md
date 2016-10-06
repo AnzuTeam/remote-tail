@@ -14,10 +14,6 @@
 * 支援 wc 指令
 * 支援 sed 指令
 
-> 取得方式
-
-* 請找 Bruce
-
 > 主要畫面
 
 ![](images/image001.png)

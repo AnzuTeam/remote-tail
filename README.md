@@ -16,15 +16,15 @@
 
 > 主要畫面
 
-![](images/image001.png)
+![主要畫面](images/image001.png)
 
 > 新增伺服器
 
-<img src="images/image002.png" style="width:300px;"/>
+![新增伺服器](images/image002.png)
 
 > 新增 Log
 
-<img src="images/image003.png" style="width:400px;"/>
+![新增 log 路徑](images/image003.png)
 
 > 偏好設定
 
@@ -33,13 +33,13 @@
 * 檔案讀取編碼
 * 外觀設定
 
-<img src="images/image005.png" style="width:300px;"/>
+![](images/image005.png)
 
 > 設定 High light
 
 * 支援 regular expression
 
-<img src="images/image004.png" style="width:300px;"/>
+![](images/image004.png)
 
 > High light 顯示
 
@@ -65,4 +65,4 @@
     * windwos : ctrl + g
     * mac : command(⌘) + g
 
-<img src="images/image009.png" style="width:400px;"/>
+![](images/image009.png)
